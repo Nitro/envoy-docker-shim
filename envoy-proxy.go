@@ -7,7 +7,7 @@ import (
 
 	"log"
 
-	"github.com/Nitro/envoy-docker-shim/envoyrpc"
+	"github.com/Nitro/envoy-docker-shim/shimrpc"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -33,7 +33,7 @@ func NewEnvoyProxy(frontendAddr, backendAddr net.Addr, svrAddr string) (*EnvoyPr
 // WithClient is a wrapper to make a new connection and close it with each call.
 // We should have extremely low throughput so this provides a level of safety by
 // reconnection each time.
-func (p *EnvoyProxy) WithClient(fn func(c envoyrpc.RegistrarClient) error) error {
+func (p *EnvoyProxy) WithClient(fn func(c shimrpc.RegistrarClient) error) error {
 	conn, err := grpc.Dial(p.ServerAddr,
 		grpc.WithInsecure(),
 		grpc.WithDialer(func(addr string, timeout time.Duration) (net.Conn, error) {
@@ -45,7 +45,7 @@ func (p *EnvoyProxy) WithClient(fn func(c envoyrpc.RegistrarClient) error) error
 		log.Fatalf("did not connect: %v", err)
 	}
 
-	c := envoyrpc.NewRegistrarClient(conn)
+	c := shimrpc.NewRegistrarClient(conn)
 	err = fn(c)
 	conn.Close()
 	return err
@@ -54,13 +54,13 @@ func (p *EnvoyProxy) WithClient(fn func(c envoyrpc.RegistrarClient) error) error
 // Run makes a call to the state server to register this endpoint.
 func (p *EnvoyProxy) Run() {
 	fmt.Printf("Starting up:\nFrontend: %s\bBackend: %s\n", p.frontendAddr, p.backendAddr)
-	err := p.WithClient(func(c envoyrpc.RegistrarClient) error {
-		resp, err := c.Register(context.Background(), &envoyrpc.RegistrarRequest{
+	err := p.WithClient(func(c shimrpc.RegistrarClient) error {
+		resp, err := c.Register(context.Background(), &shimrpc.RegistrarRequest{
 			FrontendAddr: p.frontendAddr.IP.String(),
 			FrontendPort: int32(p.frontendAddr.Port),
 			BackendAddr:  p.backendAddr.IP.String(),
 			BackendPort:  int32(p.backendAddr.Port),
-			Action:       envoyrpc.RegistrarRequest_REGISTER,
+			Action:       shimrpc.RegistrarRequest_REGISTER,
 		})
 		if err == nil {
 			log.Printf("Status: %v", resp.StatusCode)
@@ -79,13 +79,13 @@ func (p *EnvoyProxy) Run() {
 // Close makes a call to the state server to shut down this endpoint.
 func (p *EnvoyProxy) Close() {
 	fmt.Printf("Shutting down!")
-	err := p.WithClient(func(c envoyrpc.RegistrarClient) error {
-		resp, err := c.Register(context.Background(), &envoyrpc.RegistrarRequest{
+	err := p.WithClient(func(c shimrpc.RegistrarClient) error {
+		resp, err := c.Register(context.Background(), &shimrpc.RegistrarRequest{
 			FrontendAddr: p.frontendAddr.IP.String(),
 			FrontendPort: int32(p.frontendAddr.Port),
 			BackendAddr:  p.backendAddr.IP.String(),
 			BackendPort:  int32(p.backendAddr.Port),
-			Action:       envoyrpc.RegistrarRequest_DEREGISTER,
+			Action:       shimrpc.RegistrarRequest_DEREGISTER,
 		})
 		if err == nil {
 			log.Printf("Status: %v", resp.StatusCode)

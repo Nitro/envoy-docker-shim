@@ -1,16 +1,16 @@
 package main
 
 import (
-	"log"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/Nitro/envoy-docker/envoyhttp"
-	"github.com/Nitro/envoy-docker/envoyrpc"
+	"github.com/Nitro/envoy-docker-shim/envoyhttp"
+	"github.com/Nitro/envoy-docker-shim/shimrpc"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -46,6 +46,7 @@ func serveHttp(envoyApi *envoyhttp.EnvoyApi, addr string) {
 }
 
 func main() {
+	log.Info("docker-envoy-shim server starting up...")
 	lis, err := net.Listen("unix", SocketAddr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -54,8 +55,8 @@ func main() {
 	go handleStopSignals()
 
 	s := grpc.NewServer()
-	registrar := envoyrpc.NewRegistrar()
-	envoyrpc.RegisterRegistrarServer(s, registrar)
+	registrar := shimrpc.NewRegistrar()
+	shimrpc.RegisterRegistrarServer(s, registrar)
 
 	api := envoyhttp.NewEnvoyApi(registrar)
 	go serveHttp(api, ":7776")

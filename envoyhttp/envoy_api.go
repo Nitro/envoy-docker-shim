@@ -9,17 +9,17 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Nitro/envoy-docker/envoyrpc"
+	"github.com/Nitro/envoy-docker-shim/shimrpc"
 	"github.com/gorilla/mux"
 	"github.com/pquerna/ffjson/ffjson"
 	log "github.com/sirupsen/logrus"
 )
 
 type EnvoyApi struct {
-	registrar  *envoyrpc.Registrar
+	registrar  *shimrpc.Registrar
 }
 
-func NewEnvoyApi(registrar *envoyrpc.Registrar) *EnvoyApi {
+func NewEnvoyApi(registrar *shimrpc.Registrar) *EnvoyApi {
 	return &EnvoyApi{
 		registrar:  registrar,
 	}
@@ -151,7 +151,7 @@ func lookupHost(hostname string) (string, error) {
 
 // EnvoyServiceFromRequest converts a Registrar request to an Envoy
 // API service for reporting to the proxy.
-func (s *EnvoyApi) EnvoyServiceFromEntry(entry *envoyrpc.Entry) *EnvoyService {
+func (s *EnvoyApi) EnvoyServiceFromEntry(entry *shimrpc.Entry) *EnvoyService {
 	if entry == nil {
 		return nil
 	}
@@ -172,7 +172,7 @@ func (s *EnvoyApi) EnvoyServiceFromEntry(entry *envoyrpc.Entry) *EnvoyService {
 func (s *EnvoyApi) EnvoyClustersFromRegistrar() []*EnvoyCluster {
 	var clusters []*EnvoyCluster
 
-	s.registrar.EachEntry(func(port int32, entry *envoyrpc.Entry) error {
+	s.registrar.EachEntry(func(port int32, entry *shimrpc.Entry) error {
 		clusters = append(clusters, &EnvoyCluster{
 			Name:             SvcName(entry),
 			Type:             "sds", // use SDS endpoint for the hosts
@@ -193,7 +193,7 @@ func (s *EnvoyApi) EnvoyClustersFromRegistrar() []*EnvoyCluster {
 
 // EnvoyListenerFromEntry takes a Registrar request service and formats it into
 // the API format for an Envoy proxy listener (LDS API v1)
-func (s *EnvoyApi) EnvoyListenerFromEntry(entry *envoyrpc.Entry) *EnvoyListener {
+func (s *EnvoyApi) EnvoyListenerFromEntry(entry *shimrpc.Entry) *EnvoyListener {
 	apiName := SvcName(entry)
 
 	// Holy indentation, Bat Man!
@@ -238,7 +238,7 @@ func (s *EnvoyApi) EnvoyListenerFromEntry(entry *envoyrpc.Entry) *EnvoyListener 
 func (s *EnvoyApi) EnvoyListenersFromRegistrar() []*EnvoyListener {
 	var listeners []*EnvoyListener
 
-	s.registrar.EachEntry(func(port int32, entry *envoyrpc.Entry) error {
+	s.registrar.EachEntry(func(port int32, entry *shimrpc.Entry) error {
 		listeners = append(listeners, s.EnvoyListenerFromEntry(entry))
 		return nil
 	})
@@ -251,7 +251,7 @@ func (s *EnvoyApi) EnvoyListenersFromRegistrar() []*EnvoyListener {
 }
 
 // Format an Envoy service name from an endpoint
-func SvcName(entry *envoyrpc.Entry) string {
+func SvcName(entry *shimrpc.Entry) string {
 	return fmt.Sprintf("%d", entry.FrontendAddr.Port)
 }
 

@@ -1,4 +1,4 @@
-package envoyrpc
+package shimrpc
 
 import (
 	"context"

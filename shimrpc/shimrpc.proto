@@ -1,14 +1,13 @@
 syntax = "proto3";
 
 option java_multiple_files = true;
-option java_package = "com.gonitro.envoyrpc";
-option java_outer_classname = "EnvoyRpcProto";
+option java_package = "com.gonitro.envoy.shimrpc";
+option java_outer_classname = "ShimRpcProto";
 
-package envoyrpc;
+package shimrpc;
 
 service Registrar {
   rpc Register (RegistrarRequest) returns (RegistrarReply) {}
-//  rpc Deregister (RegistrarRequest) returns (RegistrarReply) {}
 }
 
 // The requested listener and cluster member
