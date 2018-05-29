@@ -10,10 +10,9 @@ import (
 	"syscall"
 )
 
-//type EnvoyState struct {
-//	Listeners []EnvoyListener
-//	Clusters  []EnvoyCluster
-//}
+const (
+	EnvoySocketPath = "/tmp/docker-envoy.sock"
+)
 
 // parseHostContainerAddrs parses the flags passed on reexec to create the TCP/UDP/SCTP
 // net.Addrs to map the host and container ports
@@ -55,7 +54,7 @@ func main() {
 	f := os.NewFile(3, "signal-parent")
 	host, container := parseHostContainerAddrs()
 
-	p, err := NewEnvoyProxy(host, container, "/tmp/docker-envoy.sock")
+	p, err := NewProxy(host, container, "/tmp/docker-envoy.sock")
 	if err != nil {
 		fmt.Fprintf(f, "1\n%s", err)
 		f.Close()
