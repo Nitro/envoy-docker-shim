@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.gonitro.envoyrpc";
+option java_outer_classname = "EnvoyRpcProto";
+
+package envoyrpc;
+
+service Registrar {
+  rpc Register (RegistrarRequest) returns (RegistrarReply) {}
+//  rpc Deregister (RegistrarRequest) returns (RegistrarReply) {}
+}
+
+// The requested listener and cluster member
+message RegistrarRequest {
+  string frontend_addr = 1;
+  int32  frontend_port = 2;
+  string backend_addr = 3;
+  int32  backend_port = 4;
+
+  enum Action {
+  	REGISTER = 0;
+	DEREGISTER = 1;
+  }
+
+  Action action = 5;
+}
+
+// The response message containing the status
+message RegistrarReply {
+  int32 status_code = 1;
+}
