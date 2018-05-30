@@ -6,7 +6,6 @@ import (
 	"net"
 	"net/http"
 	_ "net/http/pprof"
-	"strconv"
 	"time"
 
 	"github.com/Nitro/envoy-docker-shim/shimrpc"
@@ -16,12 +15,12 @@ import (
 )
 
 type EnvoyApi struct {
-	registrar  *shimrpc.Registrar
+	registrar *shimrpc.Registrar
 }
 
 func NewEnvoyApi(registrar *shimrpc.Registrar) *EnvoyApi {
 	return &EnvoyApi{
-		registrar:  registrar,
+		registrar: registrar,
 	}
 }
 
@@ -46,18 +45,11 @@ func (s *EnvoyApi) registrationHandler(response http.ResponseWriter, req *http.R
 		return
 	}
 
-	port, err := strconv.Atoi(name)
-	if err != nil {
-		log.Debugf("Can't convert string to int! %s", name)
-		sendJsonError(response, 404, fmt.Sprintf("no instances of %s found", name))
-		return
-	}
-
-	entry := s.registrar.GetEntry(int32(port))
+	entry := s.registrar.GetEntry(name)
 
 	if entry == nil {
-		log.Debugf("Envoy Service on '%d' has no instances!", port)
-		sendJsonError(response, 404, fmt.Sprintf("no instances of %d found", port))
+		log.Debugf("Envoy Service '%s' has no instances!", name)
+		sendJsonError(response, 404, fmt.Sprintf("no instances of '%s' found", name))
 		return
 	}
 
@@ -161,7 +153,7 @@ func (s *EnvoyApi) EnvoyServiceFromEntry(entry *shimrpc.Entry) *EnvoyService {
 		LastCheckIn:     time.Now().UTC().String(),
 		Port:            int64(entry.BackendAddr.Port),
 		Revision:        "1",
-		Service:         SvcName(entry),
+		Service:         shimrpc.SvcName(entry),
 		ServiceRepoName: "docker service",
 		Tags:            map[string]string{},
 	}
@@ -172,13 +164,13 @@ func (s *EnvoyApi) EnvoyServiceFromEntry(entry *shimrpc.Entry) *EnvoyService {
 func (s *EnvoyApi) EnvoyClustersFromRegistrar() []*EnvoyCluster {
 	var clusters []*EnvoyCluster
 
-	s.registrar.EachEntry(func(port int32, entry *shimrpc.Entry) error {
+	s.registrar.EachEntry(func(name string, entry *shimrpc.Entry) error {
 		clusters = append(clusters, &EnvoyCluster{
-			Name:             SvcName(entry),
+			Name:             shimrpc.SvcName(entry),
 			Type:             "sds", // use SDS endpoint for the hosts
 			ConnectTimeoutMs: 500,
 			LBType:           "round_robin",
-			ServiceName:      SvcName(entry),
+			ServiceName:      shimrpc.SvcName(entry),
 		})
 
 		return nil
@@ -194,7 +186,7 @@ func (s *EnvoyApi) EnvoyClustersFromRegistrar() []*EnvoyCluster {
 // EnvoyListenerFromEntry takes a Registrar request service and formats it into
 // the API format for an Envoy proxy listener (LDS API v1)
 func (s *EnvoyApi) EnvoyListenerFromEntry(entry *shimrpc.Entry) *EnvoyListener {
-	apiName := SvcName(entry)
+	apiName := shimrpc.SvcName(entry)
 
 	// Holy indentation, Bat Man!
 	return &EnvoyListener{
@@ -215,7 +207,7 @@ func (s *EnvoyApi) EnvoyListenerFromEntry(entry *shimrpc.Entry) *EnvoyListener {
 					RouteConfig: &EnvoyRouteConfig{
 						VirtualHosts: []*EnvoyVirtualHost{
 							{
-								Name:    SvcName(entry),
+								Name:    shimrpc.SvcName(entry),
 								Domains: []string{"*"},
 								Routes: []*EnvoyRoute{
 									{
@@ -241,7 +233,7 @@ func (s *EnvoyApi) EnvoyListenerFromEntry(entry *shimrpc.Entry) *EnvoyListener {
 func (s *EnvoyApi) EnvoyListenersFromRegistrar() []*EnvoyListener {
 	var listeners []*EnvoyListener
 
-	s.registrar.EachEntry(func(port int32, entry *shimrpc.Entry) error {
+	s.registrar.EachEntry(func(name string, entry *shimrpc.Entry) error {
 		listeners = append(listeners, s.EnvoyListenerFromEntry(entry))
 		return nil
 	})
@@ -251,11 +243,6 @@ func (s *EnvoyApi) EnvoyListenersFromRegistrar() []*EnvoyListener {
 	}
 
 	return listeners
-}
-
-// Format an Envoy service name from an endpoint
-func SvcName(entry *shimrpc.Entry) string {
-	return fmt.Sprintf("%d", entry.FrontendAddr.Port)
 }
 
 // Send back a JSON encoded error and message

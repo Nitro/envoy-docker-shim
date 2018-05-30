@@ -23,6 +23,9 @@ message RegistrarRequest {
   }
 
   Action action = 5;
+
+  string environment_name = 6;
+  string service_name = 7;
 }
 
 // The response message containing the status

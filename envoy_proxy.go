@@ -10,6 +10,12 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	ServiceNameLabel     = "ServiceName"
+	EnvironmentNameLabel = "EnvironmentName"
+	DockerUrl            = "unix:///var/run/docker.sock"
+)
+
 type EnvoyProxy struct {
 	ServerAddr   string
 	frontendAddr *net.TCPAddr
@@ -52,13 +58,26 @@ func (p *EnvoyProxy) WithClient(fn func(c shimrpc.RegistrarClient) error) error 
 // Run makes a call to the state server to register this endpoint.
 func (p *EnvoyProxy) Run() {
 	log.Infof("Starting up:\nFrontend: %s\nBackend: %s", p.frontendAddr, p.backendAddr)
-	err := p.WithClient(func(c shimrpc.RegistrarClient) error {
+
+	time.Sleep(1 * time.Second)
+
+	container, err := ContainerForPort(DockerUrl, p.frontendAddr.Port)
+	if err != nil {
+		log.Fatalf("Unable to find container! (%s)", err)
+	}
+
+	envName := container.Labels[EnvironmentNameLabel]
+	svcName := container.Labels[ServiceNameLabel]
+
+	err = p.WithClient(func(c shimrpc.RegistrarClient) error {
 		resp, err := c.Register(context.Background(), &shimrpc.RegistrarRequest{
-			FrontendAddr: p.frontendAddr.IP.String(),
-			FrontendPort: int32(p.frontendAddr.Port),
-			BackendAddr:  p.backendAddr.IP.String(),
-			BackendPort:  int32(p.backendAddr.Port),
-			Action:       shimrpc.RegistrarRequest_REGISTER,
+			FrontendAddr:    p.frontendAddr.IP.String(),
+			FrontendPort:    int32(p.frontendAddr.Port),
+			BackendAddr:     p.backendAddr.IP.String(),
+			BackendPort:     int32(p.backendAddr.Port),
+			Action:          shimrpc.RegistrarRequest_REGISTER,
+			ServiceName:     svcName,
+			EnvironmentName: envName,
 		})
 		if err == nil {
 			log.Printf("Status: %v", resp.StatusCode)
