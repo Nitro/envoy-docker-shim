@@ -1,13 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"net"
 	"time"
 
-	"log"
-
 	"github.com/Nitro/envoy-docker-shim/shimrpc"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
@@ -53,7 +51,7 @@ func (p *EnvoyProxy) WithClient(fn func(c shimrpc.RegistrarClient) error) error 
 
 // Run makes a call to the state server to register this endpoint.
 func (p *EnvoyProxy) Run() {
-	fmt.Printf("Starting up:\nFrontend: %s\bBackend: %s\n", p.frontendAddr, p.backendAddr)
+	log.Infof("Starting up:\nFrontend: %s\nBackend: %s", p.frontendAddr, p.backendAddr)
 	err := p.WithClient(func(c shimrpc.RegistrarClient) error {
 		resp, err := c.Register(context.Background(), &shimrpc.RegistrarRequest{
 			FrontendAddr: p.frontendAddr.IP.String(),
@@ -78,7 +76,7 @@ func (p *EnvoyProxy) Run() {
 
 // Close makes a call to the state server to shut down this endpoint.
 func (p *EnvoyProxy) Close() {
-	fmt.Printf("Shutting down!")
+	log.Info("Shutting down!")
 	err := p.WithClient(func(c shimrpc.RegistrarClient) error {
 		resp, err := c.Register(context.Background(), &shimrpc.RegistrarRequest{
 			FrontendAddr: p.frontendAddr.IP.String(),

@@ -40,10 +40,11 @@ type EnvoyFilter struct {
 }
 
 type EnvoyHttpFilterConfig struct {
-	CodecType   string            `json:"codec_type,omitempty"`
-	StatPrefix  string            `json:"stat_prefix,omitempty"`
-	RouteConfig *EnvoyRouteConfig `json:"route_config,omitempty"`
-	Filters     []*EnvoyFilter    `json:"filters,omitempty"`
+	CodecType   string              `json:"codec_type,omitempty"`
+	StatPrefix  string              `json:"stat_prefix,omitempty"`
+	RouteConfig *EnvoyRouteConfig   `json:"route_config,omitempty"`
+	Filters     []*EnvoyFilter      `json:"filters,omitempty"`
+	Tracing     *EnvoyTracingConfig `json:"tracing"`
 }
 
 type EnvoyVirtualHost struct {
@@ -61,6 +62,10 @@ type EnvoyRoute struct {
 	Prefix      string `json:"prefix"`
 	HostRewrite string `json:"host_rewrite"`
 	Cluster     string `json:"cluster"`
+}
+
+type EnvoyTracingConfig struct {
+	OperationName string `json:"operation_name"`
 }
 
 type SDSResult struct {
