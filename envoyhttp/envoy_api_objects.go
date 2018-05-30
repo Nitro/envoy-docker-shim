@@ -44,7 +44,7 @@ type EnvoyHttpFilterConfig struct {
 	StatPrefix  string              `json:"stat_prefix,omitempty"`
 	RouteConfig *EnvoyRouteConfig   `json:"route_config,omitempty"`
 	Filters     []*EnvoyFilter      `json:"filters,omitempty"`
-	Tracing     *EnvoyTracingConfig `json:"tracing,omitempyy"`
+	Tracing     *EnvoyTracingConfig `json:"tracing,omitempty"`
 }
 
 type EnvoyVirtualHost struct {

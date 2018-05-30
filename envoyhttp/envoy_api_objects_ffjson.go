@@ -934,7 +934,7 @@ func (mj *EnvoyHttpFilterConfig) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteByte('{')
+	buf.WriteString(`{ `)
 	if len(mj.CodecType) != 0 {
 		buf.WriteString(`"codec_type":`)
 		fflib.WriteJsonString(buf, string(mj.CodecType))
@@ -990,19 +990,21 @@ func (mj *EnvoyHttpFilterConfig) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 		buf.WriteByte(',')
 	}
 	if mj.Tracing != nil {
-		buf.WriteString(`"tracing":`)
+		if true {
+			buf.WriteString(`"tracing":`)
 
-		{
+			{
 
-			err = mj.Tracing.MarshalJSONBuf(buf)
-			if err != nil {
-				return err
+				err = mj.Tracing.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
 			}
-
+			buf.WriteByte(',')
 		}
-	} else {
-		buf.WriteString(`"tracing":null`)
 	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
