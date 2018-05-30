@@ -10,6 +10,7 @@ import (
 // and find the one with the port that matches the one we're
 // looking for.
 func ContainerForPort(socketUrl string, port int) (*docker.APIContainers, error) {
+	// TODO use NewClientFromEnv()
 	if len(socketUrl) < 1 {
 		socketUrl = "unix:///var/run/docker.sock"
 	}

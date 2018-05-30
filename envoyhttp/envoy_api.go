@@ -220,7 +220,7 @@ func (s *EnvoyApi) EnvoyListenerFromEntry(entry *shimrpc.Entry) *EnvoyListener {
 						},
 					},
 					Tracing: &EnvoyTracingConfig{
-						OperationName: "ingress",
+						OperationName: "egress",
 					},
 				},
 			},
