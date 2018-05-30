@@ -13,7 +13,6 @@ import (
 const (
 	ServiceNameLabel     = "ServiceName"
 	EnvironmentNameLabel = "EnvironmentName"
-	DockerUrl            = "unix:///var/run/docker.sock"
 )
 
 type EnvoyProxy struct {
@@ -59,17 +58,13 @@ func (p *EnvoyProxy) WithClient(fn func(c shimrpc.RegistrarClient) error) error 
 func (p *EnvoyProxy) Run() {
 	log.Infof("Starting up:\nFrontend: %s\nBackend: %s", p.frontendAddr, p.backendAddr)
 
+	// Have to give Docker a quick breather to see the container.
+	// XXX maybe watch events instead?
 	time.Sleep(1 * time.Second)
 
-	container, err := ContainerForPort(DockerUrl, p.frontendAddr.Port)
-	if err != nil {
-		log.Fatalf("Unable to find container! (%s)", err)
-	}
+	envName, svcName := EnvAndSvcName(p.frontendAddr.Port)
 
-	envName := container.Labels[EnvironmentNameLabel]
-	svcName := container.Labels[ServiceNameLabel]
-
-	err = p.WithClient(func(c shimrpc.RegistrarClient) error {
+	err := p.WithClient(func(c shimrpc.RegistrarClient) error {
 		resp, err := c.Register(context.Background(), &shimrpc.RegistrarRequest{
 			FrontendAddr:    p.frontendAddr.IP.String(),
 			FrontendPort:    int32(p.frontendAddr.Port),
@@ -96,13 +91,18 @@ func (p *EnvoyProxy) Run() {
 // Close makes a call to the state server to shut down this endpoint.
 func (p *EnvoyProxy) Close() {
 	log.Info("Shutting down!")
+
+	envName, svcName := EnvAndSvcName(p.frontendAddr.Port)
+
 	err := p.WithClient(func(c shimrpc.RegistrarClient) error {
 		resp, err := c.Register(context.Background(), &shimrpc.RegistrarRequest{
-			FrontendAddr: p.frontendAddr.IP.String(),
-			FrontendPort: int32(p.frontendAddr.Port),
-			BackendAddr:  p.backendAddr.IP.String(),
-			BackendPort:  int32(p.backendAddr.Port),
-			Action:       shimrpc.RegistrarRequest_DEREGISTER,
+			FrontendAddr:    p.frontendAddr.IP.String(),
+			FrontendPort:    int32(p.frontendAddr.Port),
+			BackendAddr:     p.backendAddr.IP.String(),
+			BackendPort:     int32(p.backendAddr.Port),
+			Action:          shimrpc.RegistrarRequest_DEREGISTER,
+			ServiceName:     svcName,
+			EnvironmentName: envName,
 		})
 		if err == nil {
 			log.Printf("Status: %v", resp.StatusCode)
