@@ -26,6 +26,7 @@ type EnvoyProxy struct {
 	frontendAddr *net.TCPAddr
 	backendAddr  *net.TCPAddr
 	Discoverer   DiscoveryClient
+	Reload       bool // Are we waiting around or just reloading the settings?
 }
 
 // NewEnvoyProxy returns a correctly configured EnvoyProxy.
@@ -62,50 +63,44 @@ func (p *EnvoyProxy) WithClient(fn func(c shimrpc.RegistrarClient) error) error 
 	return err
 }
 
-// Run makes a call to the state server to register this endpoint.
-func (p *EnvoyProxy) Run() {
-	log.Infof("Starting up:\nFrontend: %s\nBackend: %s", p.frontendAddr, p.backendAddr)
-
-	// Have to give Docker a quick breather to see the container.
-	// XXX maybe watch events instead?
-	time.Sleep(1 * time.Second)
-
+func (p *EnvoyProxy) doAction(action shimrpc.RegistrarRequest_Action) error {
 	settings := p.Discoverer.ContainerFieldsForPort(p.frontendAddr.Port)
 	req := p.RequestWithSettings(settings)
-	req.Action = shimrpc.RegistrarRequest_REGISTER
+	req.Action = action
 
-	err := p.WithClient(func(c shimrpc.RegistrarClient) error {
+	return p.WithClient(func(c shimrpc.RegistrarClient) error {
 		resp, err := c.Register(context.Background(), req)
 		if err == nil {
 			log.Printf("Status: %v", resp.StatusCode)
 		}
 		return err
 	})
+}
 
+// Run makes a call to the state server to register this endpoint.
+func (p *EnvoyProxy) Run() {
+	log.Infof("Starting up:\nFrontend: %s\nBackend: %s", p.frontendAddr, p.backendAddr)
+
+	// Have to give Docker a quick breather to see the container.
+	// XXX maybe watch events or poll the API instead?
+	time.Sleep(1 * time.Second)
+
+	err := p.doAction(shimrpc.RegistrarRequest_REGISTER)
 	if err != nil {
 		log.Fatalf("Could not call Envoy: %s", err)
 	}
 
 	// Wait for the signal handler to shut us down
-	select {}
+	if !p.Reload {
+		select {}
+	}
 }
 
 // Close makes a call to the state server to shut down this endpoint.
 func (p *EnvoyProxy) Close() {
 	log.Info("Shutting down!")
 
-	settings := p.Discoverer.ContainerFieldsForPort(p.frontendAddr.Port)
-	req := p.RequestWithSettings(settings)
-	req.Action = shimrpc.RegistrarRequest_DEREGISTER
-
-	err := p.WithClient(func(c shimrpc.RegistrarClient) error {
-		resp, err := c.Register(context.Background(), req)
-		if err == nil {
-			log.Printf("Status: %v", resp.StatusCode)
-		}
-		return err
-	})
-
+	err := p.doAction(shimrpc.RegistrarRequest_DEREGISTER)
 	if err != nil {
 		log.Fatalf("Could not call Envoy: %s", err)
 	}

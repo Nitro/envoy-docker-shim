@@ -20,13 +20,8 @@ type DiscoveryClient interface {
 
 type DockerClient struct{}
 
-// ContainerForPort connects to Docker, lists all the containers
-// and find the one with the port that matches the one we're
-// looking for.
-func (d *DockerClient) ContainerForPort(socketUrl string, port int) (*docker.APIContainers, error) {
-	var client *docker.Client
-	var err error
-
+// getClient connects and returns a Docker client
+func (d *DockerClient) getClient(socketUrl string) (client *docker.Client, err error) {
 	if len(socketUrl) > 0 {
 		client, err = docker.NewClient(socketUrl)
 	} else {
@@ -35,6 +30,20 @@ func (d *DockerClient) ContainerForPort(socketUrl string, port int) (*docker.API
 
 	if err != nil {
 		return nil, fmt.Errorf("Can't connect to Docker: %s", err)
+	}
+
+	return client, nil
+}
+
+// ContainerForPort connects to Docker, lists all the containers
+// and find the one with the port that matches the one we're
+// looking for.
+func (d *DockerClient) ContainerForPort(socketUrl string, port int) (*docker.APIContainers, error) {
+	var err error
+
+	client, err := d.getClient(socketUrl)
+	if err != nil {
+		return nil, err
 	}
 
 	// Make sure we list all containers, including stopped ones,
