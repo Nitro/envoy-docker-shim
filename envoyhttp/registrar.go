@@ -16,6 +16,7 @@ type Entry struct {
 	BackendAddr     *net.TCPAddr
 	ServiceName     string
 	EnvironmentName string
+	ProxyMode       string
 }
 
 type Registrar struct {
@@ -72,6 +73,7 @@ func RequestToEntry(req *shimrpc.RegistrarRequest) *Entry {
 		},
 		ServiceName:     req.ServiceName,
 		EnvironmentName: req.EnvironmentName,
+		ProxyMode:       req.ProxyMode,
 	}
 }
 
