@@ -8,17 +8,16 @@ import (
 	_ "net/http/pprof"
 	"time"
 
-	"github.com/Nitro/envoy-docker-shim/shimrpc"
 	"github.com/gorilla/mux"
 	"github.com/pquerna/ffjson/ffjson"
 	log "github.com/sirupsen/logrus"
 )
 
 type EnvoyApi struct {
-	registrar *shimrpc.Registrar
+	registrar *Registrar
 }
 
-func NewEnvoyApi(registrar *shimrpc.Registrar) *EnvoyApi {
+func NewEnvoyApi(registrar *Registrar) *EnvoyApi {
 	return &EnvoyApi{
 		registrar: registrar,
 	}
@@ -143,7 +142,7 @@ func lookupHost(hostname string) (string, error) {
 
 // EnvoyServiceFromRequest converts a Registrar request to an Envoy
 // API service for reporting to the proxy.
-func (s *EnvoyApi) EnvoyServiceFromEntry(entry *shimrpc.Entry) *EnvoyService {
+func (s *EnvoyApi) EnvoyServiceFromEntry(entry *Entry) *EnvoyService {
 	if entry == nil {
 		return nil
 	}
@@ -153,7 +152,7 @@ func (s *EnvoyApi) EnvoyServiceFromEntry(entry *shimrpc.Entry) *EnvoyService {
 		LastCheckIn:     time.Now().UTC().String(),
 		Port:            int64(entry.BackendAddr.Port),
 		Revision:        "1",
-		Service:         shimrpc.SvcName(entry),
+		Service:         SvcName(entry),
 		ServiceRepoName: "docker service",
 		Tags:            map[string]string{},
 	}
@@ -164,13 +163,13 @@ func (s *EnvoyApi) EnvoyServiceFromEntry(entry *shimrpc.Entry) *EnvoyService {
 func (s *EnvoyApi) EnvoyClustersFromRegistrar() []*EnvoyCluster {
 	var clusters []*EnvoyCluster
 
-	s.registrar.EachEntry(func(name string, entry *shimrpc.Entry) error {
+	s.registrar.EachEntry(func(name string, entry *Entry) error {
 		clusters = append(clusters, &EnvoyCluster{
-			Name:             shimrpc.SvcName(entry),
+			Name:             SvcName(entry),
 			Type:             "sds", // use SDS endpoint for the hosts
 			ConnectTimeoutMs: 500,
 			LBType:           "round_robin",
-			ServiceName:      shimrpc.SvcName(entry),
+			ServiceName:      SvcName(entry),
 		})
 
 		return nil
@@ -185,8 +184,8 @@ func (s *EnvoyApi) EnvoyClustersFromRegistrar() []*EnvoyCluster {
 
 // EnvoyListenerFromEntry takes a Registrar request service and formats it into
 // the API format for an Envoy proxy listener (LDS API v1)
-func (s *EnvoyApi) EnvoyListenerFromEntry(entry *shimrpc.Entry) *EnvoyListener {
-	apiName := shimrpc.SvcName(entry)
+func (s *EnvoyApi) EnvoyListenerFromEntry(entry *Entry) *EnvoyListener {
+	apiName := SvcName(entry)
 
 	// Holy indentation, Bat Man!
 	return &EnvoyListener{
@@ -207,13 +206,16 @@ func (s *EnvoyApi) EnvoyListenerFromEntry(entry *shimrpc.Entry) *EnvoyListener {
 					RouteConfig: &EnvoyRouteConfig{
 						VirtualHosts: []*EnvoyVirtualHost{
 							{
-								Name:    shimrpc.SvcName(entry),
+								Name:    SvcName(entry),
 								Domains: []string{"*"},
 								Routes: []*EnvoyRoute{
 									{
 										TimeoutMs: 0, // No timeout!
 										Prefix:    "/",
 										Cluster:   apiName,
+										Decorator: &EnvoyRouteDecorator{
+											Operation: entry.ServiceName,
+										},
 									},
 								},
 							},
@@ -233,7 +235,7 @@ func (s *EnvoyApi) EnvoyListenerFromEntry(entry *shimrpc.Entry) *EnvoyListener {
 func (s *EnvoyApi) EnvoyListenersFromRegistrar() []*EnvoyListener {
 	var listeners []*EnvoyListener
 
-	s.registrar.EachEntry(func(name string, entry *shimrpc.Entry) error {
+	s.registrar.EachEntry(func(name string, entry *Entry) error {
 		listeners = append(listeners, s.EnvoyListenerFromEntry(entry))
 		return nil
 	})

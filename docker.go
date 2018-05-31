@@ -2,15 +2,28 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/fsouza/go-dockerclient"
 	log "github.com/sirupsen/logrus"
 )
 
+type DockerSettings struct {
+	ServiceName     string
+	EnvironmentName string
+	ProxyMode       string
+}
+
+type DiscoveryClient interface {
+	ContainerFieldsForPort(port int) *DockerSettings
+}
+
+type DockerClient struct{}
+
 // ContainerForPort connects to Docker, lists all the containers
 // and find the one with the port that matches the one we're
 // looking for.
-func ContainerForPort(socketUrl string, port int) (*docker.APIContainers, error) {
+func (d *DockerClient) ContainerForPort(socketUrl string, port int) (*docker.APIContainers, error) {
 	var client *docker.Client
 	var err error
 
@@ -53,16 +66,22 @@ OUTER:
 	return nil, fmt.Errorf("Unable to find container with port %d", port)
 }
 
-// EnvAndSvcName returns the environment and service names from
+// ContainerFieldsForPort returns a selection of metadata lifted from
 // Docker labels if present.
-func EnvAndSvcName(port int) (envName string, svcName string) {
-	container, err := ContainerForPort("", port)
+func (d *DockerClient) ContainerFieldsForPort(port int) *DockerSettings {
+	container, err := d.ContainerForPort("", port)
 	if err != nil {
 		log.Fatalf("Unable to find container for %d! (%s)", port, err)
 	}
 
-	envName = container.Labels[EnvironmentNameLabel]
-	svcName = container.Labels[ServiceNameLabel]
+	proxyMode := container.Labels[ProxyModeLabel]
+	if len(proxyMode) < 1 {
+		proxyMode = "http"
+	}
 
-	return envName, svcName
+	return &DockerSettings{
+		EnvironmentName: container.Labels[EnvironmentNameLabel],
+		ServiceName:     container.Labels[ServiceNameLabel],
+		ProxyMode:       strings.ToLower(proxyMode),
+	}
 }

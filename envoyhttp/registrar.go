@@ -1,4 +1,4 @@
-package shimrpc
+package envoyhttp
 
 import (
 	"context"
@@ -7,6 +7,8 @@ import (
 	"log"
 	"net"
 	"sync"
+
+	"github.com/Nitro/envoy-docker-shim/shimrpc"
 )
 
 type Entry struct {
@@ -58,7 +60,7 @@ func (r *Registrar) EachEntry(fn func(svcName string, entry *Entry) error) error
 	return nil
 }
 
-func RequestToEntry(req *RegistrarRequest) *Entry {
+func RequestToEntry(req *shimrpc.RegistrarRequest) *Entry {
 	return &Entry{
 		FrontendAddr: &net.TCPAddr{
 			IP:   net.ParseIP(req.FrontendAddr),
@@ -75,13 +77,27 @@ func RequestToEntry(req *RegistrarRequest) *Entry {
 
 // Format an Envoy service name from an endpoint
 func SvcName(entry *Entry) string {
-	return fmt.Sprintf("%s-%s-%d", entry.ServiceName, entry.EnvironmentName, entry.FrontendAddr.Port)
+	var svcName string
+
+	if len(entry.ServiceName) > 0 {
+		svcName = entry.ServiceName
+	}
+
+	if len(entry.EnvironmentName) > 0 {
+		svcName += "-" + entry.EnvironmentName
+	}
+
+	if len(svcName) < 1 {
+		svcName = "unknown-"
+	}
+
+	return fmt.Sprintf("%s%d", svcName, entry.FrontendAddr.Port)
 }
 
 // Register is a GRPC callback function that handles our remote calls.
-func (r *Registrar) Register(ctx context.Context, req *RegistrarRequest) (*RegistrarReply, error) {
+func (r *Registrar) Register(ctx context.Context, req *shimrpc.RegistrarRequest) (*shimrpc.RegistrarReply, error) {
 	// Register a new endpoint
-	if req.Action == RegistrarRequest_REGISTER {
+	if req.Action == shimrpc.RegistrarRequest_REGISTER {
 		entry := RequestToEntry(req)
 		name := SvcName(entry)
 
@@ -90,11 +106,11 @@ func (r *Registrar) Register(ctx context.Context, req *RegistrarRequest) (*Regis
 		r.entries[name] = entry
 		r.PrintRequests()
 		r.Unlock()
-		return &RegistrarReply{1}, nil
+		return &shimrpc.RegistrarReply{1}, nil
 	}
 
 	// Deregister an endpoint
-	if req.Action == RegistrarRequest_DEREGISTER {
+	if req.Action == shimrpc.RegistrarRequest_DEREGISTER {
 		entry := RequestToEntry(req)
 		name := SvcName(entry)
 
@@ -103,9 +119,9 @@ func (r *Registrar) Register(ctx context.Context, req *RegistrarRequest) (*Regis
 		delete(r.entries, name)
 		r.PrintRequests()
 		r.Unlock()
-		return &RegistrarReply{1}, nil
+		return &shimrpc.RegistrarReply{1}, nil
 	}
 
 	// Who knows what we were asked to due, but we're not dpoing it
-	return &RegistrarReply{0}, errors.New("Unknown request action. No idea what to do with it.")
+	return &shimrpc.RegistrarReply{0}, errors.New("Unknown request action. No idea what to do with it.")
 }

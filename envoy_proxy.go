@@ -11,18 +11,25 @@ import (
 )
 
 const (
+	// Labels looked up in Docker to identify the service and environment names
+	// as well as the proxy mode.
 	ServiceNameLabel     = "ServiceName"
 	EnvironmentNameLabel = "EnvironmentName"
+	ProxyModeLabel       = "ProxyMode"
 )
 
+// An EnvoyProxy is a proxy instance that using a shim service to configure
+// and maintain an instance of Lyft's Envoy proxy on the host in place
+// of a normal docker-proxy instance.
 type EnvoyProxy struct {
 	ServerAddr   string
 	frontendAddr *net.TCPAddr
 	backendAddr  *net.TCPAddr
+	Discoverer   DiscoveryClient
 }
 
+// NewEnvoyProxy returns a correctly configured EnvoyProxy.
 func NewEnvoyProxy(frontendAddr, backendAddr net.Addr, svrAddr string) (*EnvoyProxy, error) {
-
 	front := frontendAddr.(*net.TCPAddr)
 	back := backendAddr.(*net.TCPAddr)
 
@@ -30,6 +37,7 @@ func NewEnvoyProxy(frontendAddr, backendAddr net.Addr, svrAddr string) (*EnvoyPr
 		frontendAddr: front,
 		backendAddr:  back,
 		ServerAddr:   svrAddr,
+		Discoverer:   &DockerClient{},
 	}, nil
 }
 
@@ -62,18 +70,12 @@ func (p *EnvoyProxy) Run() {
 	// XXX maybe watch events instead?
 	time.Sleep(1 * time.Second)
 
-	envName, svcName := EnvAndSvcName(p.frontendAddr.Port)
+	settings := p.Discoverer.ContainerFieldsForPort(p.frontendAddr.Port)
+	req := p.RequestWithSettings(settings)
+	req.Action = shimrpc.RegistrarRequest_REGISTER
 
 	err := p.WithClient(func(c shimrpc.RegistrarClient) error {
-		resp, err := c.Register(context.Background(), &shimrpc.RegistrarRequest{
-			FrontendAddr:    p.frontendAddr.IP.String(),
-			FrontendPort:    int32(p.frontendAddr.Port),
-			BackendAddr:     p.backendAddr.IP.String(),
-			BackendPort:     int32(p.backendAddr.Port),
-			Action:          shimrpc.RegistrarRequest_REGISTER,
-			ServiceName:     svcName,
-			EnvironmentName: envName,
-		})
+		resp, err := c.Register(context.Background(), req)
 		if err == nil {
 			log.Printf("Status: %v", resp.StatusCode)
 		}
@@ -92,18 +94,12 @@ func (p *EnvoyProxy) Run() {
 func (p *EnvoyProxy) Close() {
 	log.Info("Shutting down!")
 
-	envName, svcName := EnvAndSvcName(p.frontendAddr.Port)
+	settings := p.Discoverer.ContainerFieldsForPort(p.frontendAddr.Port)
+	req := p.RequestWithSettings(settings)
+	req.Action = shimrpc.RegistrarRequest_DEREGISTER
 
 	err := p.WithClient(func(c shimrpc.RegistrarClient) error {
-		resp, err := c.Register(context.Background(), &shimrpc.RegistrarRequest{
-			FrontendAddr:    p.frontendAddr.IP.String(),
-			FrontendPort:    int32(p.frontendAddr.Port),
-			BackendAddr:     p.backendAddr.IP.String(),
-			BackendPort:     int32(p.backendAddr.Port),
-			Action:          shimrpc.RegistrarRequest_DEREGISTER,
-			ServiceName:     svcName,
-			EnvironmentName: envName,
-		})
+		resp, err := c.Register(context.Background(), req)
 		if err == nil {
 			log.Printf("Status: %v", resp.StatusCode)
 		}
@@ -112,6 +108,20 @@ func (p *EnvoyProxy) Close() {
 
 	if err != nil {
 		log.Fatalf("Could not call Envoy: %s", err)
+	}
+}
+
+// RequestWithSettings returns a properly formatted shimrpc Request
+// using the DockerSettings passed in.
+func (p *EnvoyProxy) RequestWithSettings(settings *DockerSettings) *shimrpc.RegistrarRequest {
+	return &shimrpc.RegistrarRequest{
+		FrontendAddr:    p.frontendAddr.IP.String(),
+		FrontendPort:    int32(p.frontendAddr.Port),
+		BackendAddr:     p.backendAddr.IP.String(),
+		BackendPort:     int32(p.backendAddr.Port),
+		ServiceName:     settings.ServiceName,
+		EnvironmentName: settings.EnvironmentName,
+		ProxyMode:       settings.ProxyMode,
 	}
 }
 

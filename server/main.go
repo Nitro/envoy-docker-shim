@@ -55,7 +55,7 @@ func main() {
 	go handleStopSignals()
 
 	s := grpc.NewServer()
-	registrar := shimrpc.NewRegistrar()
+	registrar := envoyhttp.NewRegistrar()
 	shimrpc.RegisterRegistrarServer(s, registrar)
 
 	api := envoyhttp.NewEnvoyApi(registrar)

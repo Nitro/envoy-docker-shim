@@ -58,10 +58,15 @@ type EnvoyRouteConfig struct {
 }
 
 type EnvoyRoute struct {
-	TimeoutMs   int    `json:"timeout_ms"`
-	Prefix      string `json:"prefix"`
-	HostRewrite string `json:"host_rewrite"`
-	Cluster     string `json:"cluster"`
+	TimeoutMs   int                  `json:"timeout_ms"`
+	Prefix      string               `json:"prefix"`
+	HostRewrite string               `json:"host_rewrite"`
+	Cluster     string               `json:"cluster"`
+	Decorator   *EnvoyRouteDecorator `json:"decorator,omitempty"`
+}
+
+type EnvoyRouteDecorator struct {
+	Operation string `json:"operation,omitempty"`
 }
 
 type EnvoyTracingConfig struct {
