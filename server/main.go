@@ -5,30 +5,37 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/Nitro/envoy-docker-shim/envoyhttp"
 	"github.com/Nitro/envoy-docker-shim/shimrpc"
 	"github.com/gorilla/mux"
+	"github.com/kelseyhightower/envconfig"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	"gopkg.in/relistan/rubberneck.v1"
 )
 
-const (
-	SocketAddr = "/tmp/docker-envoy.sock"
-)
+type Config struct {
+	GrpcAddr string `envconfig:"LISTEN_ADDR" default:"unix:///tmp/docker-envoy.sock"`
+	ApiAddr    string `envconfig:"API_ADDR" default:":7776"`
+}
 
-func handleStopSignals() {
+func handleStopSignals(addr string) {
 	s := make(chan os.Signal, 10)
 	signal.Notify(s, os.Interrupt, syscall.SIGTERM)
 
 	<-s
-	err := os.Remove(SocketAddr)
-	if err != nil {
-		log.Fatal("Unable to remove socket! (" + SocketAddr + ")")
+
+	if strings.Contains(addr, "unix:") {
+		err := os.Remove(strings.Replace(addr, "unix://", "", 1))
+		if err != nil {
+			log.Fatal("Unable to remove socket! (" + addr + ")")
+		}
+		log.Printf("Removed %s", addr)
 	}
-	log.Printf("Removed %s", SocketAddr)
 	os.Exit(0)
 }
 
@@ -45,24 +52,39 @@ func serveHttp(envoyApi *envoyhttp.EnvoyApi, addr string) {
 	}
 }
 
-func main() {
-	log.Info("docker-envoy-shim server starting up...")
-	lis, err := net.Listen("unix", SocketAddr)
+func serveGRPC(registrar *envoyhttp.Registrar, addr string) {
+	addr = strings.Replace(addr, "unix://", "", 1)
+
+	lis, err := net.Listen("unix", addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	go handleStopSignals()
-
 	s := grpc.NewServer()
-	registrar := envoyhttp.NewRegistrar()
 	shimrpc.RegisterRegistrarServer(s, registrar)
-
-	api := envoyhttp.NewEnvoyApi(registrar)
-	go serveHttp(api, ":7776")
 
 	reflection.Register(s)
 	if err := s.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+}
+
+func main() {
+	log.Info("docker-envoy-shim server starting up...")
+
+	var config Config
+	err := envconfig.Process("shim", &config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	rubberneck.Print(&config)
+
+	go handleStopSignals(config.GrpcAddr)
+
+	registrar := envoyhttp.NewRegistrar()
+	api := envoyhttp.NewEnvoyApi(registrar)
+	go serveHttp(api, config.ApiAddr)
+
+	serveGRPC(registrar, config.GrpcAddr)
 }

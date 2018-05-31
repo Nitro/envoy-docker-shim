@@ -61,6 +61,8 @@ func (r *Registrar) EachEntry(fn func(svcName string, entry *Entry) error) error
 	return nil
 }
 
+// RequestToEntry turns a shimrpc Request into a permanent state entry for
+// storage in the registrar.
 func RequestToEntry(req *shimrpc.RegistrarRequest) *Entry {
 	return &Entry{
 		FrontendAddr: &net.TCPAddr{
@@ -124,6 +126,6 @@ func (r *Registrar) Register(ctx context.Context, req *shimrpc.RegistrarRequest)
 		return &shimrpc.RegistrarReply{1}, nil
 	}
 
-	// Who knows what we were asked to due, but we're not dpoing it
+	// Who knows what we were asked to do, but we're not doing it
 	return &shimrpc.RegistrarReply{0}, errors.New("Unknown request action. No idea what to do with it.")
 }
