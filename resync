@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# ------------------------------------------------------------------------------
+# This tool trawls through /proc looking for existing instances of
+# envoy-docker-shim that are running. It then re-runs the command with the
+# -reload flag added. This causes the shim to re-sync a new instance of the
+# server with the current state. Existing copies of the shim are not disturbed,
+# and they will still correctly deregister the container on shutdown.
+# ------------------------------------------------------------------------------
+
+strFormat() {
+	# Fix the formatting of /proc/*/cmdline files
+	tr '[\0\n]' ' ' < $1
+}
+
+TMPFILE=/tmp/$$.tmp.sh
+for file in `find /proc -name "cmdline" 2>/dev/null`; do
+	CONTENT=`strFormat $file 2>/dev/null`
+	echo $CONTENT | grep -v "dockerd" | grep "envoy-docker-shim" >/dev/null
+	if [[ $? -eq 0 ]]; then
+		echo -n $CONTENT
+		echo " -reload"
+	fi
+done | sort -u > $TMPFILE
+
+sh -xe $TMPFILE
+rm -f $TMPFILE
