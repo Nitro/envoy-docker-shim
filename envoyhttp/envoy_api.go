@@ -187,24 +187,26 @@ func (s *EnvoyApi) EnvoyClustersFromRegistrar() []*EnvoyCluster {
 func (s *EnvoyApi) EnvoyListenerFromEntry(entry *Entry) *EnvoyListener {
 	apiName := SvcName(entry)
 
-	// Holy indentation, Bat Man!
-	return &EnvoyListener{
+	listener := &EnvoyListener{
 		Name:    apiName,
 		Address: fmt.Sprintf("tcp://%s:%d", entry.FrontendAddr.IP, entry.FrontendAddr.Port),
-		Filters: []*EnvoyFilter{
+	}
+
+	if  entry.ProxyMode == "http" {
+		listener.Filters = []*EnvoyFilter{
 			{
 				Name: "envoy.http_connection_manager",
-				Config: &EnvoyHttpFilterConfig{
+				Config: &EnvoyFilterConfig{
 					CodecType:  "auto",
 					StatPrefix: "ingress_http",
 					Filters: []*EnvoyFilter{
 						{
 							Name:   "router",
-							Config: &EnvoyHttpFilterConfig{},
+							Config: &EnvoyFilterConfig{},
 						},
 					},
 					RouteConfig: &EnvoyRouteConfig{
-						VirtualHosts: []*EnvoyVirtualHost{
+						VirtualHosts: []*EnvoyHTTPVirtualHost{
 							{
 								Name:    SvcName(entry),
 								Domains: []string{"*"},
@@ -226,8 +228,26 @@ func (s *EnvoyApi) EnvoyListenerFromEntry(entry *Entry) *EnvoyListener {
 					},
 				},
 			},
-		},
+		}
+	} else { // == "tcp"
+		listener.Filters = []*EnvoyFilter{
+			{
+				Name: "envoy.tcp_proxy",
+				Config: &EnvoyFilterConfig{
+					StatPrefix: "ingress_tcp",
+					RouteConfig: &EnvoyRouteConfig{
+						Routes: []*EnvoyTCPRoute{
+							{
+								Cluster: SvcName(entry),
+							},
+						},
+					},
+				},
+			},
+		}
 	}
+
+	return listener
 }
 
 // EnvoyListenersFromRegistrar creates a set of Enovy API listener

@@ -870,7 +870,7 @@ handle_Name:
 
 handle_Config:
 
-	/* handler: uj.Config type=envoyhttp.EnvoyHttpFilterConfig kind=struct quoted=false*/
+	/* handler: uj.Config type=envoyhttp.EnvoyFilterConfig kind=struct quoted=false*/
 
 	{
 		if tok == fflib.FFTok_null {
@@ -882,7 +882,7 @@ handle_Config:
 		}
 
 		if uj.Config == nil {
-			uj.Config = new(EnvoyHttpFilterConfig)
+			uj.Config = new(EnvoyFilterConfig)
 		}
 
 		err = uj.Config.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
@@ -913,7 +913,7 @@ done:
 	return nil
 }
 
-func (mj *EnvoyHttpFilterConfig) MarshalJSON() ([]byte, error) {
+func (mj *EnvoyFilterConfig) MarshalJSON() ([]byte, error) {
 	var buf fflib.Buffer
 	if mj == nil {
 		buf.WriteString("null")
@@ -925,7 +925,7 @@ func (mj *EnvoyHttpFilterConfig) MarshalJSON() ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
-func (mj *EnvoyHttpFilterConfig) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
+func (mj *EnvoyFilterConfig) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	if mj == nil {
 		buf.WriteString("null")
 		return nil
@@ -1010,38 +1010,38 @@ func (mj *EnvoyHttpFilterConfig) MarshalJSONBuf(buf fflib.EncodingBuffer) error 
 }
 
 const (
-	ffj_t_EnvoyHttpFilterConfigbase = iota
-	ffj_t_EnvoyHttpFilterConfigno_such_key
+	ffj_t_EnvoyFilterConfigbase = iota
+	ffj_t_EnvoyFilterConfigno_such_key
 
-	ffj_t_EnvoyHttpFilterConfig_CodecType
+	ffj_t_EnvoyFilterConfig_CodecType
 
-	ffj_t_EnvoyHttpFilterConfig_StatPrefix
+	ffj_t_EnvoyFilterConfig_StatPrefix
 
-	ffj_t_EnvoyHttpFilterConfig_RouteConfig
+	ffj_t_EnvoyFilterConfig_RouteConfig
 
-	ffj_t_EnvoyHttpFilterConfig_Filters
+	ffj_t_EnvoyFilterConfig_Filters
 
-	ffj_t_EnvoyHttpFilterConfig_Tracing
+	ffj_t_EnvoyFilterConfig_Tracing
 )
 
-var ffj_key_EnvoyHttpFilterConfig_CodecType = []byte("codec_type")
+var ffj_key_EnvoyFilterConfig_CodecType = []byte("codec_type")
 
-var ffj_key_EnvoyHttpFilterConfig_StatPrefix = []byte("stat_prefix")
+var ffj_key_EnvoyFilterConfig_StatPrefix = []byte("stat_prefix")
 
-var ffj_key_EnvoyHttpFilterConfig_RouteConfig = []byte("route_config")
+var ffj_key_EnvoyFilterConfig_RouteConfig = []byte("route_config")
 
-var ffj_key_EnvoyHttpFilterConfig_Filters = []byte("filters")
+var ffj_key_EnvoyFilterConfig_Filters = []byte("filters")
 
-var ffj_key_EnvoyHttpFilterConfig_Tracing = []byte("tracing")
+var ffj_key_EnvoyFilterConfig_Tracing = []byte("tracing")
 
-func (uj *EnvoyHttpFilterConfig) UnmarshalJSON(input []byte) error {
+func (uj *EnvoyFilterConfig) UnmarshalJSON(input []byte) error {
 	fs := fflib.NewFFLexer(input)
 	return uj.UnmarshalJSONFFLexer(fs, fflib.FFParse_map_start)
 }
 
-func (uj *EnvoyHttpFilterConfig) UnmarshalJSONFFLexer(fs *fflib.FFLexer, state fflib.FFParseState) error {
+func (uj *EnvoyFilterConfig) UnmarshalJSONFFLexer(fs *fflib.FFLexer, state fflib.FFParseState) error {
 	var err error = nil
-	currentKey := ffj_t_EnvoyHttpFilterConfigbase
+	currentKey := ffj_t_EnvoyFilterConfigbase
 	_ = currentKey
 	tok := fflib.FFTok_init
 	wantedTok := fflib.FFTok_init
@@ -1087,7 +1087,7 @@ mainparse:
 			kn := fs.Output.Bytes()
 			if len(kn) <= 0 {
 				// "" case. hrm.
-				currentKey = ffj_t_EnvoyHttpFilterConfigno_such_key
+				currentKey = ffj_t_EnvoyFilterConfigno_such_key
 				state = fflib.FFParse_want_colon
 				goto mainparse
 			} else {
@@ -1095,77 +1095,77 @@ mainparse:
 
 				case 'c':
 
-					if bytes.Equal(ffj_key_EnvoyHttpFilterConfig_CodecType, kn) {
-						currentKey = ffj_t_EnvoyHttpFilterConfig_CodecType
+					if bytes.Equal(ffj_key_EnvoyFilterConfig_CodecType, kn) {
+						currentKey = ffj_t_EnvoyFilterConfig_CodecType
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				case 'f':
 
-					if bytes.Equal(ffj_key_EnvoyHttpFilterConfig_Filters, kn) {
-						currentKey = ffj_t_EnvoyHttpFilterConfig_Filters
+					if bytes.Equal(ffj_key_EnvoyFilterConfig_Filters, kn) {
+						currentKey = ffj_t_EnvoyFilterConfig_Filters
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				case 'r':
 
-					if bytes.Equal(ffj_key_EnvoyHttpFilterConfig_RouteConfig, kn) {
-						currentKey = ffj_t_EnvoyHttpFilterConfig_RouteConfig
+					if bytes.Equal(ffj_key_EnvoyFilterConfig_RouteConfig, kn) {
+						currentKey = ffj_t_EnvoyFilterConfig_RouteConfig
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				case 's':
 
-					if bytes.Equal(ffj_key_EnvoyHttpFilterConfig_StatPrefix, kn) {
-						currentKey = ffj_t_EnvoyHttpFilterConfig_StatPrefix
+					if bytes.Equal(ffj_key_EnvoyFilterConfig_StatPrefix, kn) {
+						currentKey = ffj_t_EnvoyFilterConfig_StatPrefix
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				case 't':
 
-					if bytes.Equal(ffj_key_EnvoyHttpFilterConfig_Tracing, kn) {
-						currentKey = ffj_t_EnvoyHttpFilterConfig_Tracing
+					if bytes.Equal(ffj_key_EnvoyFilterConfig_Tracing, kn) {
+						currentKey = ffj_t_EnvoyFilterConfig_Tracing
 						state = fflib.FFParse_want_colon
 						goto mainparse
 					}
 
 				}
 
-				if fflib.SimpleLetterEqualFold(ffj_key_EnvoyHttpFilterConfig_Tracing, kn) {
-					currentKey = ffj_t_EnvoyHttpFilterConfig_Tracing
+				if fflib.SimpleLetterEqualFold(ffj_key_EnvoyFilterConfig_Tracing, kn) {
+					currentKey = ffj_t_EnvoyFilterConfig_Tracing
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.EqualFoldRight(ffj_key_EnvoyHttpFilterConfig_Filters, kn) {
-					currentKey = ffj_t_EnvoyHttpFilterConfig_Filters
+				if fflib.EqualFoldRight(ffj_key_EnvoyFilterConfig_Filters, kn) {
+					currentKey = ffj_t_EnvoyFilterConfig_Filters
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.AsciiEqualFold(ffj_key_EnvoyHttpFilterConfig_RouteConfig, kn) {
-					currentKey = ffj_t_EnvoyHttpFilterConfig_RouteConfig
+				if fflib.AsciiEqualFold(ffj_key_EnvoyFilterConfig_RouteConfig, kn) {
+					currentKey = ffj_t_EnvoyFilterConfig_RouteConfig
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.EqualFoldRight(ffj_key_EnvoyHttpFilterConfig_StatPrefix, kn) {
-					currentKey = ffj_t_EnvoyHttpFilterConfig_StatPrefix
+				if fflib.EqualFoldRight(ffj_key_EnvoyFilterConfig_StatPrefix, kn) {
+					currentKey = ffj_t_EnvoyFilterConfig_StatPrefix
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				if fflib.AsciiEqualFold(ffj_key_EnvoyHttpFilterConfig_CodecType, kn) {
-					currentKey = ffj_t_EnvoyHttpFilterConfig_CodecType
+				if fflib.AsciiEqualFold(ffj_key_EnvoyFilterConfig_CodecType, kn) {
+					currentKey = ffj_t_EnvoyFilterConfig_CodecType
 					state = fflib.FFParse_want_colon
 					goto mainparse
 				}
 
-				currentKey = ffj_t_EnvoyHttpFilterConfigno_such_key
+				currentKey = ffj_t_EnvoyFilterConfigno_such_key
 				state = fflib.FFParse_want_colon
 				goto mainparse
 			}
@@ -1182,22 +1182,22 @@ mainparse:
 			if tok == fflib.FFTok_left_brace || tok == fflib.FFTok_left_bracket || tok == fflib.FFTok_integer || tok == fflib.FFTok_double || tok == fflib.FFTok_string || tok == fflib.FFTok_bool || tok == fflib.FFTok_null {
 				switch currentKey {
 
-				case ffj_t_EnvoyHttpFilterConfig_CodecType:
+				case ffj_t_EnvoyFilterConfig_CodecType:
 					goto handle_CodecType
 
-				case ffj_t_EnvoyHttpFilterConfig_StatPrefix:
+				case ffj_t_EnvoyFilterConfig_StatPrefix:
 					goto handle_StatPrefix
 
-				case ffj_t_EnvoyHttpFilterConfig_RouteConfig:
+				case ffj_t_EnvoyFilterConfig_RouteConfig:
 					goto handle_RouteConfig
 
-				case ffj_t_EnvoyHttpFilterConfig_Filters:
+				case ffj_t_EnvoyFilterConfig_Filters:
 					goto handle_Filters
 
-				case ffj_t_EnvoyHttpFilterConfig_Tracing:
+				case ffj_t_EnvoyFilterConfig_Tracing:
 					goto handle_Tracing
 
-				case ffj_t_EnvoyHttpFilterConfigno_such_key:
+				case ffj_t_EnvoyFilterConfigno_such_key:
 					err = fs.SkipField(tok)
 					if err != nil {
 						return fs.WrapErr(err)
@@ -1387,6 +1387,425 @@ handle_Tracing:
 			return err
 		}
 		state = fflib.FFParse_after_value
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+wantedvalue:
+	return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
+wrongtokenerror:
+	return fs.WrapErr(fmt.Errorf("ffjson: wanted token: %v, but got token: %v output=%s", wantedTok, tok, fs.Output.String()))
+tokerror:
+	if fs.BigError != nil {
+		return fs.WrapErr(fs.BigError)
+	}
+	err = fs.Error.ToError()
+	if err != nil {
+		return fs.WrapErr(err)
+	}
+	panic("ffjson-generated: unreachable, please report bug.")
+done:
+
+	return nil
+}
+
+func (mj *EnvoyHTTPVirtualHost) MarshalJSON() ([]byte, error) {
+	var buf fflib.Buffer
+	if mj == nil {
+		buf.WriteString("null")
+		return buf.Bytes(), nil
+	}
+	err := mj.MarshalJSONBuf(&buf)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+func (mj *EnvoyHTTPVirtualHost) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
+	if mj == nil {
+		buf.WriteString("null")
+		return nil
+	}
+	var err error
+	var obj []byte
+	_ = obj
+	_ = err
+	buf.WriteString(`{"name":`)
+	fflib.WriteJsonString(buf, string(mj.Name))
+	buf.WriteString(`,"domains":`)
+	if mj.Domains != nil {
+		buf.WriteString(`[`)
+		for i, v := range mj.Domains {
+			if i != 0 {
+				buf.WriteString(`,`)
+			}
+			fflib.WriteJsonString(buf, string(v))
+		}
+		buf.WriteString(`]`)
+	} else {
+		buf.WriteString(`null`)
+	}
+	buf.WriteString(`,"routes":`)
+	if mj.Routes != nil {
+		buf.WriteString(`[`)
+		for i, v := range mj.Routes {
+			if i != 0 {
+				buf.WriteString(`,`)
+			}
+
+			{
+
+				if v == nil {
+					buf.WriteString("null")
+					return nil
+				}
+
+				err = v.MarshalJSONBuf(buf)
+				if err != nil {
+					return err
+				}
+
+			}
+		}
+		buf.WriteString(`]`)
+	} else {
+		buf.WriteString(`null`)
+	}
+	buf.WriteByte('}')
+	return nil
+}
+
+const (
+	ffj_t_EnvoyHTTPVirtualHostbase = iota
+	ffj_t_EnvoyHTTPVirtualHostno_such_key
+
+	ffj_t_EnvoyHTTPVirtualHost_Name
+
+	ffj_t_EnvoyHTTPVirtualHost_Domains
+
+	ffj_t_EnvoyHTTPVirtualHost_Routes
+)
+
+var ffj_key_EnvoyHTTPVirtualHost_Name = []byte("name")
+
+var ffj_key_EnvoyHTTPVirtualHost_Domains = []byte("domains")
+
+var ffj_key_EnvoyHTTPVirtualHost_Routes = []byte("routes")
+
+func (uj *EnvoyHTTPVirtualHost) UnmarshalJSON(input []byte) error {
+	fs := fflib.NewFFLexer(input)
+	return uj.UnmarshalJSONFFLexer(fs, fflib.FFParse_map_start)
+}
+
+func (uj *EnvoyHTTPVirtualHost) UnmarshalJSONFFLexer(fs *fflib.FFLexer, state fflib.FFParseState) error {
+	var err error = nil
+	currentKey := ffj_t_EnvoyHTTPVirtualHostbase
+	_ = currentKey
+	tok := fflib.FFTok_init
+	wantedTok := fflib.FFTok_init
+
+mainparse:
+	for {
+		tok = fs.Scan()
+		//	println(fmt.Sprintf("debug: tok: %v  state: %v", tok, state))
+		if tok == fflib.FFTok_error {
+			goto tokerror
+		}
+
+		switch state {
+
+		case fflib.FFParse_map_start:
+			if tok != fflib.FFTok_left_bracket {
+				wantedTok = fflib.FFTok_left_bracket
+				goto wrongtokenerror
+			}
+			state = fflib.FFParse_want_key
+			continue
+
+		case fflib.FFParse_after_value:
+			if tok == fflib.FFTok_comma {
+				state = fflib.FFParse_want_key
+			} else if tok == fflib.FFTok_right_bracket {
+				goto done
+			} else {
+				wantedTok = fflib.FFTok_comma
+				goto wrongtokenerror
+			}
+
+		case fflib.FFParse_want_key:
+			// json {} ended. goto exit. woo.
+			if tok == fflib.FFTok_right_bracket {
+				goto done
+			}
+			if tok != fflib.FFTok_string {
+				wantedTok = fflib.FFTok_string
+				goto wrongtokenerror
+			}
+
+			kn := fs.Output.Bytes()
+			if len(kn) <= 0 {
+				// "" case. hrm.
+				currentKey = ffj_t_EnvoyHTTPVirtualHostno_such_key
+				state = fflib.FFParse_want_colon
+				goto mainparse
+			} else {
+				switch kn[0] {
+
+				case 'd':
+
+					if bytes.Equal(ffj_key_EnvoyHTTPVirtualHost_Domains, kn) {
+						currentKey = ffj_t_EnvoyHTTPVirtualHost_Domains
+						state = fflib.FFParse_want_colon
+						goto mainparse
+					}
+
+				case 'n':
+
+					if bytes.Equal(ffj_key_EnvoyHTTPVirtualHost_Name, kn) {
+						currentKey = ffj_t_EnvoyHTTPVirtualHost_Name
+						state = fflib.FFParse_want_colon
+						goto mainparse
+					}
+
+				case 'r':
+
+					if bytes.Equal(ffj_key_EnvoyHTTPVirtualHost_Routes, kn) {
+						currentKey = ffj_t_EnvoyHTTPVirtualHost_Routes
+						state = fflib.FFParse_want_colon
+						goto mainparse
+					}
+
+				}
+
+				if fflib.EqualFoldRight(ffj_key_EnvoyHTTPVirtualHost_Routes, kn) {
+					currentKey = ffj_t_EnvoyHTTPVirtualHost_Routes
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.EqualFoldRight(ffj_key_EnvoyHTTPVirtualHost_Domains, kn) {
+					currentKey = ffj_t_EnvoyHTTPVirtualHost_Domains
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.SimpleLetterEqualFold(ffj_key_EnvoyHTTPVirtualHost_Name, kn) {
+					currentKey = ffj_t_EnvoyHTTPVirtualHost_Name
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				currentKey = ffj_t_EnvoyHTTPVirtualHostno_such_key
+				state = fflib.FFParse_want_colon
+				goto mainparse
+			}
+
+		case fflib.FFParse_want_colon:
+			if tok != fflib.FFTok_colon {
+				wantedTok = fflib.FFTok_colon
+				goto wrongtokenerror
+			}
+			state = fflib.FFParse_want_value
+			continue
+		case fflib.FFParse_want_value:
+
+			if tok == fflib.FFTok_left_brace || tok == fflib.FFTok_left_bracket || tok == fflib.FFTok_integer || tok == fflib.FFTok_double || tok == fflib.FFTok_string || tok == fflib.FFTok_bool || tok == fflib.FFTok_null {
+				switch currentKey {
+
+				case ffj_t_EnvoyHTTPVirtualHost_Name:
+					goto handle_Name
+
+				case ffj_t_EnvoyHTTPVirtualHost_Domains:
+					goto handle_Domains
+
+				case ffj_t_EnvoyHTTPVirtualHost_Routes:
+					goto handle_Routes
+
+				case ffj_t_EnvoyHTTPVirtualHostno_such_key:
+					err = fs.SkipField(tok)
+					if err != nil {
+						return fs.WrapErr(err)
+					}
+					state = fflib.FFParse_after_value
+					goto mainparse
+				}
+			} else {
+				goto wantedvalue
+			}
+		}
+	}
+
+handle_Name:
+
+	/* handler: uj.Name type=string kind=string quoted=false*/
+
+	{
+
+		{
+			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
+			}
+		}
+
+		if tok == fflib.FFTok_null {
+
+		} else {
+
+			outBuf := fs.Output.Bytes()
+
+			uj.Name = string(string(outBuf))
+
+		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Domains:
+
+	/* handler: uj.Domains type=[]string kind=slice quoted=false*/
+
+	{
+
+		{
+			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for ", tok))
+			}
+		}
+
+		if tok == fflib.FFTok_null {
+			uj.Domains = nil
+		} else {
+
+			uj.Domains = []string{}
+
+			wantVal := true
+
+			for {
+
+				var tmp_uj__Domains string
+
+				tok = fs.Scan()
+				if tok == fflib.FFTok_error {
+					goto tokerror
+				}
+				if tok == fflib.FFTok_right_brace {
+					break
+				}
+
+				if tok == fflib.FFTok_comma {
+					if wantVal == true {
+						// TODO(pquerna): this isn't an ideal error message, this handles
+						// things like [,,,] as an array value.
+						return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
+					}
+					continue
+				} else {
+					wantVal = true
+				}
+
+				/* handler: tmp_uj__Domains type=string kind=string quoted=false*/
+
+				{
+
+					{
+						if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
+							return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
+						}
+					}
+
+					if tok == fflib.FFTok_null {
+
+					} else {
+
+						outBuf := fs.Output.Bytes()
+
+						tmp_uj__Domains = string(string(outBuf))
+
+					}
+				}
+
+				uj.Domains = append(uj.Domains, tmp_uj__Domains)
+
+				wantVal = false
+			}
+		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Routes:
+
+	/* handler: uj.Routes type=[]*envoyhttp.EnvoyRoute kind=slice quoted=false*/
+
+	{
+
+		{
+			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for ", tok))
+			}
+		}
+
+		if tok == fflib.FFTok_null {
+			uj.Routes = nil
+		} else {
+
+			uj.Routes = []*EnvoyRoute{}
+
+			wantVal := true
+
+			for {
+
+				var tmp_uj__Routes *EnvoyRoute
+
+				tok = fs.Scan()
+				if tok == fflib.FFTok_error {
+					goto tokerror
+				}
+				if tok == fflib.FFTok_right_brace {
+					break
+				}
+
+				if tok == fflib.FFTok_comma {
+					if wantVal == true {
+						// TODO(pquerna): this isn't an ideal error message, this handles
+						// things like [,,,] as an array value.
+						return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
+					}
+					continue
+				} else {
+					wantVal = true
+				}
+
+				/* handler: tmp_uj__Routes type=*envoyhttp.EnvoyRoute kind=ptr quoted=false*/
+
+				{
+					if tok == fflib.FFTok_null {
+
+						tmp_uj__Routes = nil
+
+						state = fflib.FFParse_after_value
+						goto mainparse
+					}
+
+					if tmp_uj__Routes == nil {
+						tmp_uj__Routes = new(EnvoyRoute)
+					}
+
+					err = tmp_uj__Routes.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+					if err != nil {
+						return err
+					}
+					state = fflib.FFParse_after_value
+				}
+
+				uj.Routes = append(uj.Routes, tmp_uj__Routes)
+
+				wantVal = false
+			}
+		}
 	}
 
 	state = fflib.FFParse_after_value
@@ -2196,32 +2615,66 @@ func (mj *EnvoyRouteConfig) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
 	var obj []byte
 	_ = obj
 	_ = err
-	buf.WriteString(`{"virtual_hosts":`)
-	if mj.VirtualHosts != nil {
-		buf.WriteString(`[`)
-		for i, v := range mj.VirtualHosts {
-			if i != 0 {
-				buf.WriteString(`,`)
-			}
-
-			{
-
-				if v == nil {
-					buf.WriteString("null")
-					return nil
+	buf.WriteString(`{ `)
+	if len(mj.VirtualHosts) != 0 {
+		buf.WriteString(`"virtual_hosts":`)
+		if mj.VirtualHosts != nil {
+			buf.WriteString(`[`)
+			for i, v := range mj.VirtualHosts {
+				if i != 0 {
+					buf.WriteString(`,`)
 				}
 
-				err = v.MarshalJSONBuf(buf)
-				if err != nil {
-					return err
-				}
+				{
 
+					if v == nil {
+						buf.WriteString("null")
+						return nil
+					}
+
+					err = v.MarshalJSONBuf(buf)
+					if err != nil {
+						return err
+					}
+
+				}
 			}
+			buf.WriteString(`]`)
+		} else {
+			buf.WriteString(`null`)
 		}
-		buf.WriteString(`]`)
-	} else {
-		buf.WriteString(`null`)
+		buf.WriteByte(',')
 	}
+	if len(mj.Routes) != 0 {
+		buf.WriteString(`"routes":`)
+		if mj.Routes != nil {
+			buf.WriteString(`[`)
+			for i, v := range mj.Routes {
+				if i != 0 {
+					buf.WriteString(`,`)
+				}
+
+				{
+
+					if v == nil {
+						buf.WriteString("null")
+						return nil
+					}
+
+					err = v.MarshalJSONBuf(buf)
+					if err != nil {
+						return err
+					}
+
+				}
+			}
+			buf.WriteString(`]`)
+		} else {
+			buf.WriteString(`null`)
+		}
+		buf.WriteByte(',')
+	}
+	buf.Rewind(1)
 	buf.WriteByte('}')
 	return nil
 }
@@ -2231,9 +2684,13 @@ const (
 	ffj_t_EnvoyRouteConfigno_such_key
 
 	ffj_t_EnvoyRouteConfig_VirtualHosts
+
+	ffj_t_EnvoyRouteConfig_Routes
 )
 
 var ffj_key_EnvoyRouteConfig_VirtualHosts = []byte("virtual_hosts")
+
+var ffj_key_EnvoyRouteConfig_Routes = []byte("routes")
 
 func (uj *EnvoyRouteConfig) UnmarshalJSON(input []byte) error {
 	fs := fflib.NewFFLexer(input)
@@ -2294,6 +2751,14 @@ mainparse:
 			} else {
 				switch kn[0] {
 
+				case 'r':
+
+					if bytes.Equal(ffj_key_EnvoyRouteConfig_Routes, kn) {
+						currentKey = ffj_t_EnvoyRouteConfig_Routes
+						state = fflib.FFParse_want_colon
+						goto mainparse
+					}
+
 				case 'v':
 
 					if bytes.Equal(ffj_key_EnvoyRouteConfig_VirtualHosts, kn) {
@@ -2302,6 +2767,12 @@ mainparse:
 						goto mainparse
 					}
 
+				}
+
+				if fflib.EqualFoldRight(ffj_key_EnvoyRouteConfig_Routes, kn) {
+					currentKey = ffj_t_EnvoyRouteConfig_Routes
+					state = fflib.FFParse_want_colon
+					goto mainparse
 				}
 
 				if fflib.EqualFoldRight(ffj_key_EnvoyRouteConfig_VirtualHosts, kn) {
@@ -2330,6 +2801,9 @@ mainparse:
 				case ffj_t_EnvoyRouteConfig_VirtualHosts:
 					goto handle_VirtualHosts
 
+				case ffj_t_EnvoyRouteConfig_Routes:
+					goto handle_Routes
+
 				case ffj_t_EnvoyRouteConfigno_such_key:
 					err = fs.SkipField(tok)
 					if err != nil {
@@ -2346,7 +2820,7 @@ mainparse:
 
 handle_VirtualHosts:
 
-	/* handler: uj.VirtualHosts type=[]*envoyhttp.EnvoyVirtualHost kind=slice quoted=false*/
+	/* handler: uj.VirtualHosts type=[]*envoyhttp.EnvoyHTTPVirtualHost kind=slice quoted=false*/
 
 	{
 
@@ -2360,13 +2834,13 @@ handle_VirtualHosts:
 			uj.VirtualHosts = nil
 		} else {
 
-			uj.VirtualHosts = []*EnvoyVirtualHost{}
+			uj.VirtualHosts = []*EnvoyHTTPVirtualHost{}
 
 			wantVal := true
 
 			for {
 
-				var tmp_uj__VirtualHosts *EnvoyVirtualHost
+				var tmp_uj__VirtualHosts *EnvoyHTTPVirtualHost
 
 				tok = fs.Scan()
 				if tok == fflib.FFTok_error {
@@ -2387,7 +2861,7 @@ handle_VirtualHosts:
 					wantVal = true
 				}
 
-				/* handler: tmp_uj__VirtualHosts type=*envoyhttp.EnvoyVirtualHost kind=ptr quoted=false*/
+				/* handler: tmp_uj__VirtualHosts type=*envoyhttp.EnvoyHTTPVirtualHost kind=ptr quoted=false*/
 
 				{
 					if tok == fflib.FFTok_null {
@@ -2399,7 +2873,7 @@ handle_VirtualHosts:
 					}
 
 					if tmp_uj__VirtualHosts == nil {
-						tmp_uj__VirtualHosts = new(EnvoyVirtualHost)
+						tmp_uj__VirtualHosts = new(EnvoyHTTPVirtualHost)
 					}
 
 					err = tmp_uj__VirtualHosts.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
@@ -2410,6 +2884,81 @@ handle_VirtualHosts:
 				}
 
 				uj.VirtualHosts = append(uj.VirtualHosts, tmp_uj__VirtualHosts)
+
+				wantVal = false
+			}
+		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_Routes:
+
+	/* handler: uj.Routes type=[]*envoyhttp.EnvoyTCPRoute kind=slice quoted=false*/
+
+	{
+
+		{
+			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for ", tok))
+			}
+		}
+
+		if tok == fflib.FFTok_null {
+			uj.Routes = nil
+		} else {
+
+			uj.Routes = []*EnvoyTCPRoute{}
+
+			wantVal := true
+
+			for {
+
+				var tmp_uj__Routes *EnvoyTCPRoute
+
+				tok = fs.Scan()
+				if tok == fflib.FFTok_error {
+					goto tokerror
+				}
+				if tok == fflib.FFTok_right_brace {
+					break
+				}
+
+				if tok == fflib.FFTok_comma {
+					if wantVal == true {
+						// TODO(pquerna): this isn't an ideal error message, this handles
+						// things like [,,,] as an array value.
+						return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
+					}
+					continue
+				} else {
+					wantVal = true
+				}
+
+				/* handler: tmp_uj__Routes type=*envoyhttp.EnvoyTCPRoute kind=ptr quoted=false*/
+
+				{
+					if tok == fflib.FFTok_null {
+
+						tmp_uj__Routes = nil
+
+						state = fflib.FFParse_after_value
+						goto mainparse
+					}
+
+					if tmp_uj__Routes == nil {
+						tmp_uj__Routes = new(EnvoyTCPRoute)
+					}
+
+					err = tmp_uj__Routes.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
+					if err != nil {
+						return err
+					}
+					state = fflib.FFParse_after_value
+				}
+
+				uj.Routes = append(uj.Routes, tmp_uj__Routes)
 
 				wantVal = false
 			}
@@ -3205,6 +3754,576 @@ done:
 	return nil
 }
 
+func (mj *EnvoyTCPRoute) MarshalJSON() ([]byte, error) {
+	var buf fflib.Buffer
+	if mj == nil {
+		buf.WriteString("null")
+		return buf.Bytes(), nil
+	}
+	err := mj.MarshalJSONBuf(&buf)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+func (mj *EnvoyTCPRoute) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
+	if mj == nil {
+		buf.WriteString("null")
+		return nil
+	}
+	var err error
+	var obj []byte
+	_ = obj
+	_ = err
+	buf.WriteString(`{ "cluster":`)
+	fflib.WriteJsonString(buf, string(mj.Cluster))
+	buf.WriteByte(',')
+	if len(mj.DestinationIPList) != 0 {
+		buf.WriteString(`"destination_ip_list":`)
+		if mj.DestinationIPList != nil {
+			buf.WriteString(`[`)
+			for i, v := range mj.DestinationIPList {
+				if i != 0 {
+					buf.WriteString(`,`)
+				}
+				fflib.WriteJsonString(buf, string(v))
+			}
+			buf.WriteString(`]`)
+		} else {
+			buf.WriteString(`null`)
+		}
+		buf.WriteByte(',')
+	}
+	if len(mj.DestinationPorts) != 0 {
+		buf.WriteString(`"destination_ports":`)
+		fflib.WriteJsonString(buf, string(mj.DestinationPorts))
+		buf.WriteByte(',')
+	}
+	if len(mj.SourceIPList) != 0 {
+		buf.WriteString(`"source_ip_list":`)
+		if mj.SourceIPList != nil {
+			buf.WriteString(`[`)
+			for i, v := range mj.SourceIPList {
+				if i != 0 {
+					buf.WriteString(`,`)
+				}
+				fflib.WriteJsonString(buf, string(v))
+			}
+			buf.WriteString(`]`)
+		} else {
+			buf.WriteString(`null`)
+		}
+		buf.WriteByte(',')
+	}
+	if len(mj.SourcePorts) != 0 {
+		buf.WriteString(`"source_ports":`)
+		if mj.SourcePorts != nil {
+			buf.WriteString(`[`)
+			for i, v := range mj.SourcePorts {
+				if i != 0 {
+					buf.WriteString(`,`)
+				}
+				fflib.WriteJsonString(buf, string(v))
+			}
+			buf.WriteString(`]`)
+		} else {
+			buf.WriteString(`null`)
+		}
+		buf.WriteByte(',')
+	}
+	buf.Rewind(1)
+	buf.WriteByte('}')
+	return nil
+}
+
+const (
+	ffj_t_EnvoyTCPRoutebase = iota
+	ffj_t_EnvoyTCPRouteno_such_key
+
+	ffj_t_EnvoyTCPRoute_Cluster
+
+	ffj_t_EnvoyTCPRoute_DestinationIPList
+
+	ffj_t_EnvoyTCPRoute_DestinationPorts
+
+	ffj_t_EnvoyTCPRoute_SourceIPList
+
+	ffj_t_EnvoyTCPRoute_SourcePorts
+)
+
+var ffj_key_EnvoyTCPRoute_Cluster = []byte("cluster")
+
+var ffj_key_EnvoyTCPRoute_DestinationIPList = []byte("destination_ip_list")
+
+var ffj_key_EnvoyTCPRoute_DestinationPorts = []byte("destination_ports")
+
+var ffj_key_EnvoyTCPRoute_SourceIPList = []byte("source_ip_list")
+
+var ffj_key_EnvoyTCPRoute_SourcePorts = []byte("source_ports")
+
+func (uj *EnvoyTCPRoute) UnmarshalJSON(input []byte) error {
+	fs := fflib.NewFFLexer(input)
+	return uj.UnmarshalJSONFFLexer(fs, fflib.FFParse_map_start)
+}
+
+func (uj *EnvoyTCPRoute) UnmarshalJSONFFLexer(fs *fflib.FFLexer, state fflib.FFParseState) error {
+	var err error = nil
+	currentKey := ffj_t_EnvoyTCPRoutebase
+	_ = currentKey
+	tok := fflib.FFTok_init
+	wantedTok := fflib.FFTok_init
+
+mainparse:
+	for {
+		tok = fs.Scan()
+		//	println(fmt.Sprintf("debug: tok: %v  state: %v", tok, state))
+		if tok == fflib.FFTok_error {
+			goto tokerror
+		}
+
+		switch state {
+
+		case fflib.FFParse_map_start:
+			if tok != fflib.FFTok_left_bracket {
+				wantedTok = fflib.FFTok_left_bracket
+				goto wrongtokenerror
+			}
+			state = fflib.FFParse_want_key
+			continue
+
+		case fflib.FFParse_after_value:
+			if tok == fflib.FFTok_comma {
+				state = fflib.FFParse_want_key
+			} else if tok == fflib.FFTok_right_bracket {
+				goto done
+			} else {
+				wantedTok = fflib.FFTok_comma
+				goto wrongtokenerror
+			}
+
+		case fflib.FFParse_want_key:
+			// json {} ended. goto exit. woo.
+			if tok == fflib.FFTok_right_bracket {
+				goto done
+			}
+			if tok != fflib.FFTok_string {
+				wantedTok = fflib.FFTok_string
+				goto wrongtokenerror
+			}
+
+			kn := fs.Output.Bytes()
+			if len(kn) <= 0 {
+				// "" case. hrm.
+				currentKey = ffj_t_EnvoyTCPRouteno_such_key
+				state = fflib.FFParse_want_colon
+				goto mainparse
+			} else {
+				switch kn[0] {
+
+				case 'c':
+
+					if bytes.Equal(ffj_key_EnvoyTCPRoute_Cluster, kn) {
+						currentKey = ffj_t_EnvoyTCPRoute_Cluster
+						state = fflib.FFParse_want_colon
+						goto mainparse
+					}
+
+				case 'd':
+
+					if bytes.Equal(ffj_key_EnvoyTCPRoute_DestinationIPList, kn) {
+						currentKey = ffj_t_EnvoyTCPRoute_DestinationIPList
+						state = fflib.FFParse_want_colon
+						goto mainparse
+
+					} else if bytes.Equal(ffj_key_EnvoyTCPRoute_DestinationPorts, kn) {
+						currentKey = ffj_t_EnvoyTCPRoute_DestinationPorts
+						state = fflib.FFParse_want_colon
+						goto mainparse
+					}
+
+				case 's':
+
+					if bytes.Equal(ffj_key_EnvoyTCPRoute_SourceIPList, kn) {
+						currentKey = ffj_t_EnvoyTCPRoute_SourceIPList
+						state = fflib.FFParse_want_colon
+						goto mainparse
+
+					} else if bytes.Equal(ffj_key_EnvoyTCPRoute_SourcePorts, kn) {
+						currentKey = ffj_t_EnvoyTCPRoute_SourcePorts
+						state = fflib.FFParse_want_colon
+						goto mainparse
+					}
+
+				}
+
+				if fflib.EqualFoldRight(ffj_key_EnvoyTCPRoute_SourcePorts, kn) {
+					currentKey = ffj_t_EnvoyTCPRoute_SourcePorts
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.EqualFoldRight(ffj_key_EnvoyTCPRoute_SourceIPList, kn) {
+					currentKey = ffj_t_EnvoyTCPRoute_SourceIPList
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.EqualFoldRight(ffj_key_EnvoyTCPRoute_DestinationPorts, kn) {
+					currentKey = ffj_t_EnvoyTCPRoute_DestinationPorts
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.EqualFoldRight(ffj_key_EnvoyTCPRoute_DestinationIPList, kn) {
+					currentKey = ffj_t_EnvoyTCPRoute_DestinationIPList
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				if fflib.EqualFoldRight(ffj_key_EnvoyTCPRoute_Cluster, kn) {
+					currentKey = ffj_t_EnvoyTCPRoute_Cluster
+					state = fflib.FFParse_want_colon
+					goto mainparse
+				}
+
+				currentKey = ffj_t_EnvoyTCPRouteno_such_key
+				state = fflib.FFParse_want_colon
+				goto mainparse
+			}
+
+		case fflib.FFParse_want_colon:
+			if tok != fflib.FFTok_colon {
+				wantedTok = fflib.FFTok_colon
+				goto wrongtokenerror
+			}
+			state = fflib.FFParse_want_value
+			continue
+		case fflib.FFParse_want_value:
+
+			if tok == fflib.FFTok_left_brace || tok == fflib.FFTok_left_bracket || tok == fflib.FFTok_integer || tok == fflib.FFTok_double || tok == fflib.FFTok_string || tok == fflib.FFTok_bool || tok == fflib.FFTok_null {
+				switch currentKey {
+
+				case ffj_t_EnvoyTCPRoute_Cluster:
+					goto handle_Cluster
+
+				case ffj_t_EnvoyTCPRoute_DestinationIPList:
+					goto handle_DestinationIPList
+
+				case ffj_t_EnvoyTCPRoute_DestinationPorts:
+					goto handle_DestinationPorts
+
+				case ffj_t_EnvoyTCPRoute_SourceIPList:
+					goto handle_SourceIPList
+
+				case ffj_t_EnvoyTCPRoute_SourcePorts:
+					goto handle_SourcePorts
+
+				case ffj_t_EnvoyTCPRouteno_such_key:
+					err = fs.SkipField(tok)
+					if err != nil {
+						return fs.WrapErr(err)
+					}
+					state = fflib.FFParse_after_value
+					goto mainparse
+				}
+			} else {
+				goto wantedvalue
+			}
+		}
+	}
+
+handle_Cluster:
+
+	/* handler: uj.Cluster type=string kind=string quoted=false*/
+
+	{
+
+		{
+			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
+			}
+		}
+
+		if tok == fflib.FFTok_null {
+
+		} else {
+
+			outBuf := fs.Output.Bytes()
+
+			uj.Cluster = string(string(outBuf))
+
+		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_DestinationIPList:
+
+	/* handler: uj.DestinationIPList type=[]string kind=slice quoted=false*/
+
+	{
+
+		{
+			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for ", tok))
+			}
+		}
+
+		if tok == fflib.FFTok_null {
+			uj.DestinationIPList = nil
+		} else {
+
+			uj.DestinationIPList = []string{}
+
+			wantVal := true
+
+			for {
+
+				var tmp_uj__DestinationIPList string
+
+				tok = fs.Scan()
+				if tok == fflib.FFTok_error {
+					goto tokerror
+				}
+				if tok == fflib.FFTok_right_brace {
+					break
+				}
+
+				if tok == fflib.FFTok_comma {
+					if wantVal == true {
+						// TODO(pquerna): this isn't an ideal error message, this handles
+						// things like [,,,] as an array value.
+						return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
+					}
+					continue
+				} else {
+					wantVal = true
+				}
+
+				/* handler: tmp_uj__DestinationIPList type=string kind=string quoted=false*/
+
+				{
+
+					{
+						if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
+							return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
+						}
+					}
+
+					if tok == fflib.FFTok_null {
+
+					} else {
+
+						outBuf := fs.Output.Bytes()
+
+						tmp_uj__DestinationIPList = string(string(outBuf))
+
+					}
+				}
+
+				uj.DestinationIPList = append(uj.DestinationIPList, tmp_uj__DestinationIPList)
+
+				wantVal = false
+			}
+		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_DestinationPorts:
+
+	/* handler: uj.DestinationPorts type=string kind=string quoted=false*/
+
+	{
+
+		{
+			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
+			}
+		}
+
+		if tok == fflib.FFTok_null {
+
+		} else {
+
+			outBuf := fs.Output.Bytes()
+
+			uj.DestinationPorts = string(string(outBuf))
+
+		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_SourceIPList:
+
+	/* handler: uj.SourceIPList type=[]string kind=slice quoted=false*/
+
+	{
+
+		{
+			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for ", tok))
+			}
+		}
+
+		if tok == fflib.FFTok_null {
+			uj.SourceIPList = nil
+		} else {
+
+			uj.SourceIPList = []string{}
+
+			wantVal := true
+
+			for {
+
+				var tmp_uj__SourceIPList string
+
+				tok = fs.Scan()
+				if tok == fflib.FFTok_error {
+					goto tokerror
+				}
+				if tok == fflib.FFTok_right_brace {
+					break
+				}
+
+				if tok == fflib.FFTok_comma {
+					if wantVal == true {
+						// TODO(pquerna): this isn't an ideal error message, this handles
+						// things like [,,,] as an array value.
+						return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
+					}
+					continue
+				} else {
+					wantVal = true
+				}
+
+				/* handler: tmp_uj__SourceIPList type=string kind=string quoted=false*/
+
+				{
+
+					{
+						if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
+							return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
+						}
+					}
+
+					if tok == fflib.FFTok_null {
+
+					} else {
+
+						outBuf := fs.Output.Bytes()
+
+						tmp_uj__SourceIPList = string(string(outBuf))
+
+					}
+				}
+
+				uj.SourceIPList = append(uj.SourceIPList, tmp_uj__SourceIPList)
+
+				wantVal = false
+			}
+		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+handle_SourcePorts:
+
+	/* handler: uj.SourcePorts type=[]string kind=slice quoted=false*/
+
+	{
+
+		{
+			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
+				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for ", tok))
+			}
+		}
+
+		if tok == fflib.FFTok_null {
+			uj.SourcePorts = nil
+		} else {
+
+			uj.SourcePorts = []string{}
+
+			wantVal := true
+
+			for {
+
+				var tmp_uj__SourcePorts string
+
+				tok = fs.Scan()
+				if tok == fflib.FFTok_error {
+					goto tokerror
+				}
+				if tok == fflib.FFTok_right_brace {
+					break
+				}
+
+				if tok == fflib.FFTok_comma {
+					if wantVal == true {
+						// TODO(pquerna): this isn't an ideal error message, this handles
+						// things like [,,,] as an array value.
+						return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
+					}
+					continue
+				} else {
+					wantVal = true
+				}
+
+				/* handler: tmp_uj__SourcePorts type=string kind=string quoted=false*/
+
+				{
+
+					{
+						if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
+							return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
+						}
+					}
+
+					if tok == fflib.FFTok_null {
+
+					} else {
+
+						outBuf := fs.Output.Bytes()
+
+						tmp_uj__SourcePorts = string(string(outBuf))
+
+					}
+				}
+
+				uj.SourcePorts = append(uj.SourcePorts, tmp_uj__SourcePorts)
+
+				wantVal = false
+			}
+		}
+	}
+
+	state = fflib.FFParse_after_value
+	goto mainparse
+
+wantedvalue:
+	return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
+wrongtokenerror:
+	return fs.WrapErr(fmt.Errorf("ffjson: wanted token: %v, but got token: %v output=%s", wantedTok, tok, fs.Output.String()))
+tokerror:
+	if fs.BigError != nil {
+		return fs.WrapErr(fs.BigError)
+	}
+	err = fs.Error.ToError()
+	if err != nil {
+		return fs.WrapErr(err)
+	}
+	panic("ffjson-generated: unreachable, please report bug.")
+done:
+
+	return nil
+}
+
 func (mj *EnvoyTracingConfig) MarshalJSON() ([]byte, error) {
 	var buf fflib.Buffer
 	if mj == nil {
@@ -3370,425 +4489,6 @@ handle_OperationName:
 
 			uj.OperationName = string(string(outBuf))
 
-		}
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
-wantedvalue:
-	return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
-wrongtokenerror:
-	return fs.WrapErr(fmt.Errorf("ffjson: wanted token: %v, but got token: %v output=%s", wantedTok, tok, fs.Output.String()))
-tokerror:
-	if fs.BigError != nil {
-		return fs.WrapErr(fs.BigError)
-	}
-	err = fs.Error.ToError()
-	if err != nil {
-		return fs.WrapErr(err)
-	}
-	panic("ffjson-generated: unreachable, please report bug.")
-done:
-
-	return nil
-}
-
-func (mj *EnvoyVirtualHost) MarshalJSON() ([]byte, error) {
-	var buf fflib.Buffer
-	if mj == nil {
-		buf.WriteString("null")
-		return buf.Bytes(), nil
-	}
-	err := mj.MarshalJSONBuf(&buf)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-func (mj *EnvoyVirtualHost) MarshalJSONBuf(buf fflib.EncodingBuffer) error {
-	if mj == nil {
-		buf.WriteString("null")
-		return nil
-	}
-	var err error
-	var obj []byte
-	_ = obj
-	_ = err
-	buf.WriteString(`{"name":`)
-	fflib.WriteJsonString(buf, string(mj.Name))
-	buf.WriteString(`,"domains":`)
-	if mj.Domains != nil {
-		buf.WriteString(`[`)
-		for i, v := range mj.Domains {
-			if i != 0 {
-				buf.WriteString(`,`)
-			}
-			fflib.WriteJsonString(buf, string(v))
-		}
-		buf.WriteString(`]`)
-	} else {
-		buf.WriteString(`null`)
-	}
-	buf.WriteString(`,"routes":`)
-	if mj.Routes != nil {
-		buf.WriteString(`[`)
-		for i, v := range mj.Routes {
-			if i != 0 {
-				buf.WriteString(`,`)
-			}
-
-			{
-
-				if v == nil {
-					buf.WriteString("null")
-					return nil
-				}
-
-				err = v.MarshalJSONBuf(buf)
-				if err != nil {
-					return err
-				}
-
-			}
-		}
-		buf.WriteString(`]`)
-	} else {
-		buf.WriteString(`null`)
-	}
-	buf.WriteByte('}')
-	return nil
-}
-
-const (
-	ffj_t_EnvoyVirtualHostbase = iota
-	ffj_t_EnvoyVirtualHostno_such_key
-
-	ffj_t_EnvoyVirtualHost_Name
-
-	ffj_t_EnvoyVirtualHost_Domains
-
-	ffj_t_EnvoyVirtualHost_Routes
-)
-
-var ffj_key_EnvoyVirtualHost_Name = []byte("name")
-
-var ffj_key_EnvoyVirtualHost_Domains = []byte("domains")
-
-var ffj_key_EnvoyVirtualHost_Routes = []byte("routes")
-
-func (uj *EnvoyVirtualHost) UnmarshalJSON(input []byte) error {
-	fs := fflib.NewFFLexer(input)
-	return uj.UnmarshalJSONFFLexer(fs, fflib.FFParse_map_start)
-}
-
-func (uj *EnvoyVirtualHost) UnmarshalJSONFFLexer(fs *fflib.FFLexer, state fflib.FFParseState) error {
-	var err error = nil
-	currentKey := ffj_t_EnvoyVirtualHostbase
-	_ = currentKey
-	tok := fflib.FFTok_init
-	wantedTok := fflib.FFTok_init
-
-mainparse:
-	for {
-		tok = fs.Scan()
-		//	println(fmt.Sprintf("debug: tok: %v  state: %v", tok, state))
-		if tok == fflib.FFTok_error {
-			goto tokerror
-		}
-
-		switch state {
-
-		case fflib.FFParse_map_start:
-			if tok != fflib.FFTok_left_bracket {
-				wantedTok = fflib.FFTok_left_bracket
-				goto wrongtokenerror
-			}
-			state = fflib.FFParse_want_key
-			continue
-
-		case fflib.FFParse_after_value:
-			if tok == fflib.FFTok_comma {
-				state = fflib.FFParse_want_key
-			} else if tok == fflib.FFTok_right_bracket {
-				goto done
-			} else {
-				wantedTok = fflib.FFTok_comma
-				goto wrongtokenerror
-			}
-
-		case fflib.FFParse_want_key:
-			// json {} ended. goto exit. woo.
-			if tok == fflib.FFTok_right_bracket {
-				goto done
-			}
-			if tok != fflib.FFTok_string {
-				wantedTok = fflib.FFTok_string
-				goto wrongtokenerror
-			}
-
-			kn := fs.Output.Bytes()
-			if len(kn) <= 0 {
-				// "" case. hrm.
-				currentKey = ffj_t_EnvoyVirtualHostno_such_key
-				state = fflib.FFParse_want_colon
-				goto mainparse
-			} else {
-				switch kn[0] {
-
-				case 'd':
-
-					if bytes.Equal(ffj_key_EnvoyVirtualHost_Domains, kn) {
-						currentKey = ffj_t_EnvoyVirtualHost_Domains
-						state = fflib.FFParse_want_colon
-						goto mainparse
-					}
-
-				case 'n':
-
-					if bytes.Equal(ffj_key_EnvoyVirtualHost_Name, kn) {
-						currentKey = ffj_t_EnvoyVirtualHost_Name
-						state = fflib.FFParse_want_colon
-						goto mainparse
-					}
-
-				case 'r':
-
-					if bytes.Equal(ffj_key_EnvoyVirtualHost_Routes, kn) {
-						currentKey = ffj_t_EnvoyVirtualHost_Routes
-						state = fflib.FFParse_want_colon
-						goto mainparse
-					}
-
-				}
-
-				if fflib.EqualFoldRight(ffj_key_EnvoyVirtualHost_Routes, kn) {
-					currentKey = ffj_t_EnvoyVirtualHost_Routes
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
-				if fflib.EqualFoldRight(ffj_key_EnvoyVirtualHost_Domains, kn) {
-					currentKey = ffj_t_EnvoyVirtualHost_Domains
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
-				if fflib.SimpleLetterEqualFold(ffj_key_EnvoyVirtualHost_Name, kn) {
-					currentKey = ffj_t_EnvoyVirtualHost_Name
-					state = fflib.FFParse_want_colon
-					goto mainparse
-				}
-
-				currentKey = ffj_t_EnvoyVirtualHostno_such_key
-				state = fflib.FFParse_want_colon
-				goto mainparse
-			}
-
-		case fflib.FFParse_want_colon:
-			if tok != fflib.FFTok_colon {
-				wantedTok = fflib.FFTok_colon
-				goto wrongtokenerror
-			}
-			state = fflib.FFParse_want_value
-			continue
-		case fflib.FFParse_want_value:
-
-			if tok == fflib.FFTok_left_brace || tok == fflib.FFTok_left_bracket || tok == fflib.FFTok_integer || tok == fflib.FFTok_double || tok == fflib.FFTok_string || tok == fflib.FFTok_bool || tok == fflib.FFTok_null {
-				switch currentKey {
-
-				case ffj_t_EnvoyVirtualHost_Name:
-					goto handle_Name
-
-				case ffj_t_EnvoyVirtualHost_Domains:
-					goto handle_Domains
-
-				case ffj_t_EnvoyVirtualHost_Routes:
-					goto handle_Routes
-
-				case ffj_t_EnvoyVirtualHostno_such_key:
-					err = fs.SkipField(tok)
-					if err != nil {
-						return fs.WrapErr(err)
-					}
-					state = fflib.FFParse_after_value
-					goto mainparse
-				}
-			} else {
-				goto wantedvalue
-			}
-		}
-	}
-
-handle_Name:
-
-	/* handler: uj.Name type=string kind=string quoted=false*/
-
-	{
-
-		{
-			if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-			}
-		}
-
-		if tok == fflib.FFTok_null {
-
-		} else {
-
-			outBuf := fs.Output.Bytes()
-
-			uj.Name = string(string(outBuf))
-
-		}
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
-handle_Domains:
-
-	/* handler: uj.Domains type=[]string kind=slice quoted=false*/
-
-	{
-
-		{
-			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for ", tok))
-			}
-		}
-
-		if tok == fflib.FFTok_null {
-			uj.Domains = nil
-		} else {
-
-			uj.Domains = []string{}
-
-			wantVal := true
-
-			for {
-
-				var tmp_uj__Domains string
-
-				tok = fs.Scan()
-				if tok == fflib.FFTok_error {
-					goto tokerror
-				}
-				if tok == fflib.FFTok_right_brace {
-					break
-				}
-
-				if tok == fflib.FFTok_comma {
-					if wantVal == true {
-						// TODO(pquerna): this isn't an ideal error message, this handles
-						// things like [,,,] as an array value.
-						return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
-					}
-					continue
-				} else {
-					wantVal = true
-				}
-
-				/* handler: tmp_uj__Domains type=string kind=string quoted=false*/
-
-				{
-
-					{
-						if tok != fflib.FFTok_string && tok != fflib.FFTok_null {
-							return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for string", tok))
-						}
-					}
-
-					if tok == fflib.FFTok_null {
-
-					} else {
-
-						outBuf := fs.Output.Bytes()
-
-						tmp_uj__Domains = string(string(outBuf))
-
-					}
-				}
-
-				uj.Domains = append(uj.Domains, tmp_uj__Domains)
-
-				wantVal = false
-			}
-		}
-	}
-
-	state = fflib.FFParse_after_value
-	goto mainparse
-
-handle_Routes:
-
-	/* handler: uj.Routes type=[]*envoyhttp.EnvoyRoute kind=slice quoted=false*/
-
-	{
-
-		{
-			if tok != fflib.FFTok_left_brace && tok != fflib.FFTok_null {
-				return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for ", tok))
-			}
-		}
-
-		if tok == fflib.FFTok_null {
-			uj.Routes = nil
-		} else {
-
-			uj.Routes = []*EnvoyRoute{}
-
-			wantVal := true
-
-			for {
-
-				var tmp_uj__Routes *EnvoyRoute
-
-				tok = fs.Scan()
-				if tok == fflib.FFTok_error {
-					goto tokerror
-				}
-				if tok == fflib.FFTok_right_brace {
-					break
-				}
-
-				if tok == fflib.FFTok_comma {
-					if wantVal == true {
-						// TODO(pquerna): this isn't an ideal error message, this handles
-						// things like [,,,] as an array value.
-						return fs.WrapErr(fmt.Errorf("wanted value token, but got token: %v", tok))
-					}
-					continue
-				} else {
-					wantVal = true
-				}
-
-				/* handler: tmp_uj__Routes type=*envoyhttp.EnvoyRoute kind=ptr quoted=false*/
-
-				{
-					if tok == fflib.FFTok_null {
-
-						tmp_uj__Routes = nil
-
-						state = fflib.FFParse_after_value
-						goto mainparse
-					}
-
-					if tmp_uj__Routes == nil {
-						tmp_uj__Routes = new(EnvoyRoute)
-					}
-
-					err = tmp_uj__Routes.UnmarshalJSONFFLexer(fs, fflib.FFParse_want_key)
-					if err != nil {
-						return err
-					}
-					state = fflib.FFParse_after_value
-				}
-
-				uj.Routes = append(uj.Routes, tmp_uj__Routes)
-
-				wantVal = false
-			}
 		}
 	}
 

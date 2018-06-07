@@ -95,7 +95,7 @@ func SvcName(entry *Entry) string {
 		svcName = "unknown-"
 	}
 
-	return fmt.Sprintf("%s%d", svcName, entry.FrontendAddr.Port)
+	return fmt.Sprintf("%s-%d", svcName, entry.FrontendAddr.Port)
 }
 
 // Register is a GRPC callback function that handles our remote calls.

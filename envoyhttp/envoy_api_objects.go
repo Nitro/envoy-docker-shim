@@ -29,17 +29,17 @@ type EnvoyCluster struct {
 type EnvoyListener struct {
 	Name    string         `json:"name"`
 	Address string         `json:"address"`
-	Filters []*EnvoyFilter `json:"filters"` // TODO support filters?
+	Filters []*EnvoyFilter `json:"filters"`
 	// Many optional fields omitted
 }
 
-// A basic Envoy Http Route Filter
+// A basic Envoy Route Filter
 type EnvoyFilter struct {
 	Name   string                 `json:"name"`
-	Config *EnvoyHttpFilterConfig `json:"config"`
+	Config *EnvoyFilterConfig `json:"config"`
 }
 
-type EnvoyHttpFilterConfig struct {
+type EnvoyFilterConfig struct {
 	CodecType   string              `json:"codec_type,omitempty"`
 	StatPrefix  string              `json:"stat_prefix,omitempty"`
 	RouteConfig *EnvoyRouteConfig   `json:"route_config,omitempty"`
@@ -47,14 +47,15 @@ type EnvoyHttpFilterConfig struct {
 	Tracing     *EnvoyTracingConfig `json:"tracing,omitempty"`
 }
 
-type EnvoyVirtualHost struct {
+type EnvoyHTTPVirtualHost struct {
 	Name    string        `json:"name"`
 	Domains []string      `json:"domains"`
 	Routes  []*EnvoyRoute `json:"routes"`
 }
 
 type EnvoyRouteConfig struct {
-	VirtualHosts []*EnvoyVirtualHost `json:"virtual_hosts"`
+	VirtualHosts []*EnvoyHTTPVirtualHost `json:"virtual_hosts,omitempty"` // Used for HTTP
+	Routes       []*EnvoyTCPRoute        `json:"routes,omitempty"` // Use for TCP
 }
 
 type EnvoyRoute struct {
@@ -71,6 +72,14 @@ type EnvoyRouteDecorator struct {
 
 type EnvoyTracingConfig struct {
 	OperationName string `json:"operation_name"`
+}
+
+type EnvoyTCPRoute struct {
+	Cluster           string   `json:"cluster"`
+	DestinationIPList []string `json:"destination_ip_list,omitempty"`
+	DestinationPorts  string   `json:"destination_ports,omitempty"`
+	SourceIPList      []string `json:"source_ip_list,omitempty"`
+	SourcePorts       []string `json:"source_ports,omitempty"`
 }
 
 type SDSResult struct {
