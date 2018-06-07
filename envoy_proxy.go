@@ -99,8 +99,16 @@ func withRetries(retries []int, fn func() error) error {
 func (p *EnvoyProxy) Run() {
 	log.Infof("Starting up:\nFrontend: %s\nBackend: %s", p.frontendAddr, p.backendAddr)
 
+	// Have to give Docker a quick breather to see the container.
+	// XXX maybe watch events or poll the API instead?
+	time.Sleep(1 * time.Second)
+
 	err := withRetries([]int{100, 500, 1000, 1500}, func() error {
-		return p.DoAction(shimrpc.RegistrarRequest_REGISTER)
+		err2 := p.DoAction(shimrpc.RegistrarRequest_REGISTER)
+		if err2 != nil {
+			log.Warn("Retrying...")
+		}
+		return err2
 	})
 
 	if err != nil {
