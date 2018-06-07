@@ -3,7 +3,6 @@ package envoyhttp
 import (
 	"encoding/json"
 	"fmt"
-	"net"
 	"net/http"
 	_ "net/http/pprof"
 	"time"
@@ -54,13 +53,6 @@ func (s *EnvoyApi) registrationHandler(response http.ResponseWriter, req *http.R
 
 	instances := []*EnvoyService{
 		s.EnvoyServiceFromEntry(entry),
-	}
-
-	// Did we have any entries for this service in the catalog?
-	if len(instances) == 0 {
-		log.Debugf("Envoy Service '%s' has no instances!", name)
-		sendJsonError(response, 404, fmt.Sprintf("no instances of %s found", name))
-		return
 	}
 
 	result := SDSResult{
@@ -128,18 +120,6 @@ func (s *EnvoyApi) listenersHandler(response http.ResponseWriter, req *http.Requ
 	response.Write(jsonBytes)
 }
 
-// lookupHost does a vv slow lookup of the DNS host for a service. Totally
-// not optimized for high throughput. You should only do this in development
-// scenarios.
-func lookupHost(hostname string) (string, error) {
-	addrs, err := net.LookupHost(hostname)
-
-	if err != nil {
-		return "", err
-	}
-	return addrs[0], nil
-}
-
 // EnvoyServiceFromRequest converts a Registrar request to an Envoy
 // API service for reporting to the proxy.
 func (s *EnvoyApi) EnvoyServiceFromEntry(entry *Entry) *EnvoyService {
@@ -192,7 +172,7 @@ func (s *EnvoyApi) EnvoyListenerFromEntry(entry *Entry) *EnvoyListener {
 		Address: fmt.Sprintf("tcp://%s:%d", entry.FrontendAddr.IP, entry.FrontendAddr.Port),
 	}
 
-	if  entry.ProxyMode == "http" {
+	if entry.ProxyMode == "http" {
 		listener.Filters = []*EnvoyFilter{
 			{
 				Name: "envoy.http_connection_manager",

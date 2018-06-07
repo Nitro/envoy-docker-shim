@@ -6,17 +6,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/Nitro/envoy-docker-shim/shimrpc"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 var (
-	hostname = "chaucer"
-
-	baseTime = time.Now().UTC()
-
 	req1 = &shimrpc.RegistrarRequest{
 		FrontendAddr:    "192.168.168.99",
 		FrontendPort:    12345,
@@ -58,7 +53,7 @@ func Test_clustersHandler(t *testing.T) {
 		registrar.Register(context.Background(), req2)
 		registrar.Register(context.Background(), req3)
 
-		api := &EnvoyApi{registrar: registrar}
+		api := NewEnvoyApi(registrar)
 
 		req := httptest.NewRequest("GET", "/clusters", nil)
 		recorder := httptest.NewRecorder()
@@ -74,13 +69,13 @@ func Test_clustersHandler(t *testing.T) {
 		Convey("does not include deregistered services", func() {
 			req1.Action = shimrpc.RegistrarRequest_DEREGISTER
 			registrar.Register(context.Background(), req1)
+			req1.Action = shimrpc.RegistrarRequest_REGISTER
 
 			api.clustersHandler(recorder, req, nil)
 			status, _, body := getResult(recorder)
 
 			So(status, ShouldEqual, 200)
 			So(body, ShouldNotContainSubstring, "bede")
-			req1.Action = shimrpc.RegistrarRequest_REGISTER
 		})
 	})
 }
@@ -92,7 +87,7 @@ func Test_registrationHandler(t *testing.T) {
 		registrar.Register(context.Background(), req2)
 		registrar.Register(context.Background(), req3)
 
-		api := &EnvoyApi{registrar: registrar}
+		api := NewEnvoyApi(registrar)
 
 		recorder := httptest.NewRecorder()
 
@@ -152,7 +147,7 @@ func Test_listenersHandler(t *testing.T) {
 		registrar.Register(context.Background(), req2)
 		registrar.Register(context.Background(), req3)
 
-		api := &EnvoyApi{registrar: registrar}
+		api := NewEnvoyApi(registrar)
 
 		recorder := httptest.NewRecorder()
 
@@ -203,6 +198,16 @@ func Test_listenersHandler(t *testing.T) {
 				So(body, ShouldContainSubstring, "chretien")
 			})
 		})
+	})
+}
+
+func Test_HttpMux(t *testing.T) {
+	Convey("HttpMux() returns a configured mux", t, func() {
+		registrar := NewRegistrar()
+		api := NewEnvoyApi(registrar)
+
+		mux := api.HttpMux()
+		So(mux, ShouldNotBeNil)
 	})
 }
 
