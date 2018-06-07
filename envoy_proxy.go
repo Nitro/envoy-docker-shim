@@ -49,7 +49,7 @@ func (p *EnvoyProxy) WithClient(fn func(c shimrpc.RegistrarClient) error) error 
 	conn, err := grpc.Dial(p.ServerAddr,
 		grpc.WithInsecure(),
 		grpc.WithDialer(func(addr string, timeout time.Duration) (net.Conn, error) {
-			log.Printf("Connecting on Unix socket: %s", addr)
+			log.Infof("Connecting on Unix socket: %s", addr)
 			return net.DialTimeout("unix", addr, timeout)
 		}),
 	)
@@ -71,10 +71,25 @@ func (p *EnvoyProxy) doAction(action shimrpc.RegistrarRequest_Action) error {
 	return p.WithClient(func(c shimrpc.RegistrarClient) error {
 		resp, err := c.Register(context.Background(), req)
 		if err == nil {
-			log.Printf("Status: %v", resp.StatusCode)
+			log.Infof("Status: %v", resp.StatusCode)
 		}
 		return err
 	})
+}
+
+// withRetries is a decorator to retry with fixed durations
+func withRetries(retries []int, fn func() error) error {
+	var err error
+	for _, millis := range retries {
+		err = fn()
+		if err == nil {
+			return nil
+		}
+
+		time.Sleep(time.Duration(millis) * time.Millisecond)
+	}
+
+	return err
 }
 
 // Run makes a call to the state server to register this endpoint.
@@ -85,7 +100,10 @@ func (p *EnvoyProxy) Run() {
 	// XXX maybe watch events or poll the API instead?
 	time.Sleep(1 * time.Second)
 
-	err := p.doAction(shimrpc.RegistrarRequest_REGISTER)
+	err := withRetries([]int{100, 500, 1000, 1500}, func() error {
+		return p.doAction(shimrpc.RegistrarRequest_REGISTER)
+	})
+
 	if err != nil {
 		log.Fatalf("Could not call Envoy: %s", err)
 	}
@@ -100,7 +118,10 @@ func (p *EnvoyProxy) Run() {
 func (p *EnvoyProxy) Close() {
 	log.Info("Shutting down!")
 
-	err := p.doAction(shimrpc.RegistrarRequest_DEREGISTER)
+	err := withRetries([]int{100, 500, 1000, 1500}, func() error {
+		return p.doAction(shimrpc.RegistrarRequest_DEREGISTER)
+	})
+
 	if err != nil {
 		log.Fatalf("Could not call Envoy: %s", err)
 	}
