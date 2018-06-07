@@ -63,7 +63,10 @@ func (p *EnvoyProxy) WithClient(fn func(c shimrpc.RegistrarClient) error) error 
 	return err
 }
 
-func (p *EnvoyProxy) doAction(action shimrpc.RegistrarRequest_Action) error {
+// DoAction wrpas up all the right settings into a request and sticks in
+// the requested action. It then calls the GRPC server using the client
+// returned from WithClient.
+func (p *EnvoyProxy) DoAction(action shimrpc.RegistrarRequest_Action) error {
 	settings := p.Discoverer.ContainerFieldsForPort(p.frontendAddr.Port)
 	req := p.RequestWithSettings(settings)
 	req.Action = action
@@ -96,12 +99,8 @@ func withRetries(retries []int, fn func() error) error {
 func (p *EnvoyProxy) Run() {
 	log.Infof("Starting up:\nFrontend: %s\nBackend: %s", p.frontendAddr, p.backendAddr)
 
-	// Have to give Docker a quick breather to see the container.
-	// XXX maybe watch events or poll the API instead?
-	time.Sleep(1 * time.Second)
-
 	err := withRetries([]int{100, 500, 1000, 1500}, func() error {
-		return p.doAction(shimrpc.RegistrarRequest_REGISTER)
+		return p.DoAction(shimrpc.RegistrarRequest_REGISTER)
 	})
 
 	if err != nil {
@@ -119,7 +118,7 @@ func (p *EnvoyProxy) Close() {
 	log.Info("Shutting down!")
 
 	err := withRetries([]int{100, 500, 1000, 1500}, func() error {
-		return p.doAction(shimrpc.RegistrarRequest_DEREGISTER)
+		return p.DoAction(shimrpc.RegistrarRequest_DEREGISTER)
 	})
 
 	if err != nil {
