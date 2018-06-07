@@ -1,114 +1,100 @@
 package envoyhttp
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
 
-	"github.com/Nitro/sidecar/catalog"
-	"github.com/Nitro/sidecar/service"
+	"github.com/Nitro/envoy-docker-shim/shimrpc"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
 var (
 	hostname = "chaucer"
-	state = catalog.NewServicesState()
 
 	baseTime = time.Now().UTC()
 
-	svcId = "deadbeef123"
-	svcId2 = "deadbeef456"
-	svcId3 = "deadbeef666"
-
-	svc = service.Service{
-		ID:       svcId,
-		Name:     "bocaccio",
-		Image:    "101deadbeef",
-		Created:  baseTime,
-		Hostname: hostname,
-		Updated:  baseTime,
-		Status:   service.ALIVE,
-		Ports: []service.Port{
-			{ IP: "127.0.0.1", Port: 9999, ServicePort: 10100 },
-		},
+	req1 = &shimrpc.RegistrarRequest{
+		FrontendAddr:    "192.168.168.99",
+		FrontendPort:    12345,
+		BackendAddr:     "172.16.10.1",
+		BackendPort:     80,
+		EnvironmentName: "dev",
+		ServiceName:     "bede",
+		ProxyMode:       "tcp",
+		Action:          shimrpc.RegistrarRequest_REGISTER,
 	}
 
-	svc2 = service.Service{
-		ID:       svcId2,
-		Name:     "shakespeare",
-		Image:    "202deadbeef",
-		Created:  baseTime,
-		Hostname: hostname,
-		Updated:  baseTime,
-		Status:   service.UNHEALTHY,
-		Ports: []service.Port{
-			{ IP: "127.0.0.1", Port: 9000, ServicePort: 10111 },
-		},
+	req2 = &shimrpc.RegistrarRequest{
+		FrontendAddr:    "192.168.168.98",
+		FrontendPort:    23451,
+		BackendAddr:     "172.16.10.2",
+		BackendPort:     8080,
+		EnvironmentName: "dev",
+		ServiceName:     "chretien",
+		ProxyMode:       "http",
+		Action:          shimrpc.RegistrarRequest_REGISTER,
 	}
 
-	svc3 = service.Service{
-		ID:       svcId3,
-		Name:     "dante",
-		Image:    "666deadbeef",
-		Created:  baseTime,
-		Hostname: hostname,
-		Updated:  baseTime,
-		Status:   service.ALIVE,
+	req3 = &shimrpc.RegistrarRequest{
+		FrontendAddr:    "192.168.168.97",
+		FrontendPort:    23555,
+		BackendAddr:     "172.16.10.3",
+		BackendPort:     9000,
+		EnvironmentName: "dev",
+		ServiceName:     "hakluyt",
+		ProxyMode:       "http",
+		Action:          shimrpc.RegistrarRequest_REGISTER,
 	}
 )
 
 func Test_clustersHandler(t *testing.T) {
 	Convey("clustersHandler()", t, func() {
-		state.AddServiceEntry(svc)
-		state.AddServiceEntry(svc2)
-		state.AddServiceEntry(svc3)
+		registrar := NewRegistrar()
+		registrar.Register(context.Background(), req1)
+		registrar.Register(context.Background(), req2)
+		registrar.Register(context.Background(), req3)
+
+		api := &EnvoyApi{registrar: registrar}
 
 		req := httptest.NewRequest("GET", "/clusters", nil)
 		recorder := httptest.NewRecorder()
 
-		bindIP := "192.168.168.168"
-
-		api := &EnvoyApi{state: state, config: &HttpConfig{BindIP: bindIP}}
-
-		Convey("returns information for alive services", func() {
+		Convey("returns information for registered services", func() {
 			api.clustersHandler(recorder, req, nil)
 			status, _, body := getResult(recorder)
 
 			So(status, ShouldEqual, 200)
-			So(body, ShouldContainSubstring, "bocaccio")
+			So(body, ShouldContainSubstring, "hakluyt")
 		})
 
-		Convey("does not include unhealthy services", func() {
+		Convey("does not include deregistered services", func() {
+			req1.Action = shimrpc.RegistrarRequest_DEREGISTER
+			registrar.Register(context.Background(), req1)
+
 			api.clustersHandler(recorder, req, nil)
 			status, _, body := getResult(recorder)
 
 			So(status, ShouldEqual, 200)
-			So(body, ShouldNotContainSubstring, "shakespeare")
-		})
-
-		Convey("does not include services without a ServicePort", func() {
-			api.clustersHandler(recorder, req, nil)
-			status, _, body := getResult(recorder)
-
-			So(status, ShouldEqual, 200)
-			So(body, ShouldNotContainSubstring, "dante")
+			So(body, ShouldNotContainSubstring, "bede")
+			req1.Action = shimrpc.RegistrarRequest_REGISTER
 		})
 	})
 }
 
 func Test_registrationHandler(t *testing.T) {
 	Convey("registrationHandler()", t, func() {
-		state.AddServiceEntry(svc)
-		state.AddServiceEntry(svc2)
-		state.AddServiceEntry(svc3)
+		registrar := NewRegistrar()
+		registrar.Register(context.Background(), req1)
+		registrar.Register(context.Background(), req2)
+		registrar.Register(context.Background(), req3)
+
+		api := &EnvoyApi{registrar: registrar}
 
 		recorder := httptest.NewRecorder()
-
-		bindIP := "192.168.168.168"
-
-		api := &EnvoyApi{state: state, config: &HttpConfig{BindIP: bindIP}}
 
 		Convey("returns an error unless a service is provided", func() {
 			req := httptest.NewRequest("GET", "/registration/", nil)
@@ -118,10 +104,10 @@ func Test_registrationHandler(t *testing.T) {
 			So(status, ShouldEqual, 404)
 		})
 
-		Convey("returns an error unless port is appended", func() {
+		Convey("returns an error unless registered name is appended to the URL", func() {
 			req := httptest.NewRequest("GET", "/registration/", nil)
 			params := map[string]string{
-				"service":      "bocaccio",
+				"service": "bocaccio",
 			}
 			api.registrationHandler(recorder, req, params)
 			status, _, _ := getResult(recorder)
@@ -129,72 +115,93 @@ func Test_registrationHandler(t *testing.T) {
 			So(status, ShouldEqual, 404)
 		})
 
-		Convey("returns information for alive services", func() {
-			req := httptest.NewRequest("GET", "/registration/bocaccio:10100", nil)
+		Convey("returns information for registered endpoints", func() {
+			req := httptest.NewRequest("GET", "/registration/bede-dev-12345", nil)
 			params := map[string]string{
-				"service":      "bocaccio:10100",
+				"service": "bede-dev-12345",
 			}
 			api.registrationHandler(recorder, req, params)
 			status, _, body := getResult(recorder)
 
 			So(status, ShouldEqual, 200)
-			So(body, ShouldContainSubstring, "bocaccio")
+			So(body, ShouldContainSubstring, "bede")
 		})
 
-		Convey("does not include services without a ServicePort", func() {
-			req := httptest.NewRequest("GET", "/registration/dante:12323", nil)
+		Convey("does not include deregistered endpoints", func() {
+			req1.Action = shimrpc.RegistrarRequest_DEREGISTER
+			registrar.Register(context.Background(), req1)
+			req1.Action = shimrpc.RegistrarRequest_REGISTER
+
+			req := httptest.NewRequest("GET", "/registration/bede-dev-12345", nil)
 			params := map[string]string{
-				"service":      "dante:12323",
+				"service": "bede-dev-12345",
 			}
 			api.registrationHandler(recorder, req, params)
 			status, _, body := getResult(recorder)
 
 			So(status, ShouldEqual, 404)
-			So(body, ShouldContainSubstring, "no instances of dante")
-		})
-
-		Convey("does not include unhealthy services", func() {
-			req := httptest.NewRequest("GET", "/registration/shakespeare:10111", nil)
-			params := map[string]string{
-				"service":      "shakespeare:10111",
-			}
-			api.registrationHandler(recorder, req, params)
-			status, _, body := getResult(recorder)
-
-			So(body, ShouldContainSubstring, "no instances")
-			So(status, ShouldEqual, 404)
+			So(body, ShouldContainSubstring, "no instances of 'bede")
 		})
 	})
 }
 
 func Test_listenersHandler(t *testing.T) {
 	Convey("listenersHandler()", t, func() {
-		state.AddServiceEntry(svc)
-		state.AddServiceEntry(svc2)
-		state.AddServiceEntry(svc3)
+		registrar := NewRegistrar()
+		registrar.Register(context.Background(), req1)
+		registrar.Register(context.Background(), req2)
+		registrar.Register(context.Background(), req3)
+
+		api := &EnvoyApi{registrar: registrar}
 
 		recorder := httptest.NewRecorder()
 
-		bindIP := "192.168.168.168"
-
-		api := &EnvoyApi{state: state, config: &HttpConfig{BindIP: bindIP}}
-
-		Convey("returns listeners for alive services", func() {
+		Convey("returns listeners for registered endpoints", func() {
 			req := httptest.NewRequest("GET", "/listeners/", nil)
 			api.listenersHandler(recorder, req, nil)
 			status, _, body := getResult(recorder)
 
 			So(status, ShouldEqual, 200)
-			So(body, ShouldContainSubstring, "bocaccio")
+			So(body, ShouldContainSubstring, "bede")
+			So(body, ShouldContainSubstring, "hakluyt")
+			So(body, ShouldContainSubstring, "chretien")
 		})
 
-		Convey("doesn't return listeners for unhealthy services", func() {
-			req := httptest.NewRequest("GET", "/listeners/", nil)
-			api.listenersHandler(recorder, req, nil)
-			status, _, body := getResult(recorder)
+		Convey("respects the ProxyMode setting when returning results", func() {
 
-			So(status, ShouldEqual, 200)
-			So(body, ShouldNotContainSubstring, "shakespeare")
+			Convey("for TCP mode", func() {
+				req2.Action = shimrpc.RegistrarRequest_DEREGISTER
+				registrar.Register(context.Background(), req2)
+				req2.Action = shimrpc.RegistrarRequest_REGISTER
+
+				req3.Action = shimrpc.RegistrarRequest_DEREGISTER
+				registrar.Register(context.Background(), req3)
+				req3.Action = shimrpc.RegistrarRequest_REGISTER
+
+				req := httptest.NewRequest("GET", "/listeners/", nil)
+				api.listenersHandler(recorder, req, nil)
+				status, _, body := getResult(recorder)
+
+				So(status, ShouldEqual, 200)
+				So(body, ShouldContainSubstring, "bede")
+				So(body, ShouldNotContainSubstring, "hakluyt")
+				So(body, ShouldNotContainSubstring, "chretien")
+			})
+
+			Convey("for HTTP mode", func() {
+				req1.Action = shimrpc.RegistrarRequest_DEREGISTER
+				registrar.Register(context.Background(), req1)
+				req1.Action = shimrpc.RegistrarRequest_REGISTER
+
+				req := httptest.NewRequest("GET", "/listeners/", nil)
+				api.listenersHandler(recorder, req, nil)
+				status, _, body := getResult(recorder)
+
+				So(status, ShouldEqual, 200)
+				So(body, ShouldNotContainSubstring, "bede")
+				So(body, ShouldContainSubstring, "hakluyt")
+				So(body, ShouldContainSubstring, "chretien")
+			})
 		})
 	})
 }
