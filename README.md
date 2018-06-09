@@ -37,6 +37,27 @@ allowing traffic to flow into the bridged network directly via the Kernel.  All
 traffic will be proxied at Layer 4 or 7, depending on which mode you are
 proxying.
 
+Operations
+----------
+
+The command line tool doesn't require any special operations. However, the
+other two components require a little attention.
+
+### Server
+
+You will need to start the server part of this application on the Docker host
+itself. We'll be building a container for this, but for now you need to just
+put the binary somewhere and get it to start.
+
+### Resync
+
+To prevent issues with getting out of sync with reality, the server only stores
+state in memory. Upon restart of the service, when existing copies of the shim
+are running for containers, you need to run the `resync` script, which will
+lookin the process table and replay entries for existing containers. If you run
+the server from systemd or another process manager, you should make sure that
+the resync is run when the service is up.
+
 Container Settings
 ------------------
 
@@ -56,3 +77,28 @@ are:
 * `ProxyMode`: This shim assumes that you will be running in `http` proxy mode
   and that is the default value for this label if you don't provide it. If you
   instead want Envoy to proxy TCP traffic, you need to provide the value `tcp`.
+
+Example Configuration
+---------------------
+
+We've included an exmaple `envoy.yaml` in the [examples](./examples) directory,
+which will get you up and running with Envoy (tested on 1.6, 1.7). This should
+work with the upstream Envoy container, or with [Nitro's Envoy
+container](https://hub.docker.com/r/gonitro/envoyproxy/)
+
+Contributing
+------------
+
+Contributions are more than welcome. Bug reports with specific reproduction
+steps are great. If you have a code contribution you'd like to make, open a
+pull request with suggested code.
+
+Pull requests should:
+
+ * Clearly state their intent in the title
+ * Have a description that explains the need for the changes
+ * Include tests!
+ * Not break the public API
+
+Ping us to let us know you're working on something interesting by opening a
+GitHub Issue on the project.

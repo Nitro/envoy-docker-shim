@@ -1,0 +1,77 @@
+---
+admin:
+  access_log_path: "/tmp/admin_access.log"
+  address: tcp://0.0.0.0:9901
+
+tracing:
+  http:
+    driver:
+      type: zipkin
+      config:
+        collector_cluster: "zipkin-collector"
+        collector_endpoint: "/api/v1/spans"
+
+#runtime:
+#  symlink_root: /srv
+#  subdirectory: envoy
+
+lds:
+  refresh_delay_ms: 7000
+  cluster: shim-lds
+
+listeners:
+  - address: tcp://0.0.0.0:10000
+    filters:
+    - name: envoy.http_connection_manager
+      config:
+        codec_type: auto
+        stat_prefix: ingress_http
+        route_config:
+          virtual_hosts:
+          - name: local_service
+            domains: [ "*" ]
+            routes:
+            - timeout_ms: 0
+              prefix: "/"
+              cluster: envoy-ui
+        filters:
+        - name: router
+          config: {}
+
+cluster_manager:
+  clusters:
+  - name: envoy-ui
+    connect_timeout_ms: 250
+    type: static
+    lb_type: round_robin
+    hosts: [ {"url": "tcp://127.0.0.1:8080"} ]
+
+  - name: shim-lds
+    connect_timeout_ms: 250
+    type: static
+    lb_type: round_robin
+    hosts: [ {"url": "tcp://127.0.0.1:7776"} ]
+
+  - name: zipkin-collector
+    connect_timeout_ms: 20
+    type: static
+    lb_type: round_robin
+    hosts: [ {"url": "tcp://127.0.0.1:9411"} ]
+    
+  sds:
+    refresh_delay_ms: 4000
+    cluster:
+      name: shim-sds
+      connect_timeout_ms: 250
+      type: static
+      lb_type: round_robin
+      hosts: [ {"url": "tcp://127.0.0.1:7776"} ]
+
+  cds:
+    refresh_delay_ms: 4000
+    cluster:
+      name: shim-cds
+      connect_timeout_ms: 250
+      type: static
+      lb_type: round_robin
+      hosts: [ {"url": "tcp://127.0.0.1:7776"} ]
