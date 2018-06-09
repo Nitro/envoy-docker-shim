@@ -27,6 +27,7 @@ type EnvoyProxy struct {
 	backendAddr  *net.TCPAddr
 	Discoverer   DiscoveryClient
 	Reload       bool // Are we waiting around or just reloading the settings?
+	Retries      []int
 }
 
 // NewEnvoyProxy returns a correctly configured EnvoyProxy.
@@ -39,6 +40,7 @@ func NewEnvoyProxy(frontendAddr, backendAddr net.Addr, svrAddr string) (*EnvoyPr
 		backendAddr:  back,
 		ServerAddr:   svrAddr,
 		Discoverer:   &DockerClient{},
+		Retries:      []int{100, 500, 1000, 1500},
 	}, nil
 }
 
@@ -86,9 +88,9 @@ func (p *EnvoyProxy) DoAction(action shimrpc.RegistrarRequest_Action) error {
 }
 
 // withRetries is a decorator to retry with fixed durations
-func withRetries(retries []int, fn func() error) error {
+func (p *EnvoyProxy) withRetries(fn func() error) error {
 	var err error
-	for _, millis := range retries {
+	for _, millis := range p.Retries {
 		err = fn()
 		if err == nil {
 			return nil
@@ -110,7 +112,7 @@ func (p *EnvoyProxy) Run() {
 		time.Sleep(1 * time.Second)
 	}
 
-	err := withRetries([]int{100, 500, 1000, 1500}, func() error {
+	err := p.withRetries(func() error {
 		err2 := p.DoAction(shimrpc.RegistrarRequest_REGISTER)
 		if err2 != nil {
 			log.Warn("Retrying...")
@@ -135,7 +137,7 @@ func (p *EnvoyProxy) Run() {
 func (p *EnvoyProxy) Close() {
 	log.Info("Shutting down!")
 
-	err := withRetries([]int{100, 500, 1000, 1500}, func() error {
+	err := p.withRetries(func() error {
 		return p.DoAction(shimrpc.RegistrarRequest_DEREGISTER)
 	})
 

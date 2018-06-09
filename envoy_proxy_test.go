@@ -57,6 +57,7 @@ func Test_WithClient(t *testing.T) {
 	Convey("WithClient()", t, func() {
 		socketPath := filepath.Join(os.TempDir(), "docker-envoy.sock")
 		proxy, _ := NewEnvoyProxy(&fAddr, &bAddr, socketPath)
+		proxy.Retries = []int{1,1}
 		registrar := envoyhttp.NewRegistrar()
 
 		Reset(func() {
@@ -101,6 +102,7 @@ func Test_Run(t *testing.T) {
 		proxy, _ := NewEnvoyProxy(&fAddr, &bAddr, socketPath)
 		proxy.Reload = true
 		proxy.Discoverer = &mockDiscoveryClient{}
+		proxy.Retries = []int{1,1}
 		registrar := envoyhttp.NewRegistrar()
 
 		s := serveGRPC(registrar, socketPath)
@@ -113,6 +115,12 @@ func Test_Run(t *testing.T) {
 		Convey("registers with the Registrar when things are working", func() {
 			So(proxy.Run, ShouldNotPanic)
 		})
+
+		Convey("panics when the Registrar is down", func() {
+			s.GracefulStop()
+			os.Remove(socketPath)
+			So(proxy.Run, ShouldPanic)
+		})
 	})
 }
 
@@ -122,6 +130,8 @@ func Test_Close(t *testing.T) {
 		proxy, _ := NewEnvoyProxy(&fAddr, &bAddr, socketPath)
 		proxy.Reload = true
 		proxy.Discoverer = &mockDiscoveryClient{}
+		proxy.Retries = []int{1,1}
+
 		registrar := envoyhttp.NewRegistrar()
 
 		s := serveGRPC(registrar, socketPath)
