@@ -52,9 +52,11 @@ func (p *EnvoyProxy) WithClient(fn func(c shimrpc.RegistrarClient) error) error 
 			log.Infof("Connecting on Unix socket: %s", addr)
 			return net.DialTimeout("unix", addr, timeout)
 		}),
+		grpc.WithBlock(),
+		grpc.FailOnNonTempDialError(true),
 	)
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		return err
 	}
 
 	c := shimrpc.NewRegistrarClient(conn)
@@ -67,7 +69,10 @@ func (p *EnvoyProxy) WithClient(fn func(c shimrpc.RegistrarClient) error) error 
 // the requested action. It then calls the GRPC server using the client
 // returned from WithClient.
 func (p *EnvoyProxy) DoAction(action shimrpc.RegistrarRequest_Action) error {
-	settings := p.Discoverer.ContainerFieldsForPort(p.frontendAddr.Port)
+	settings, err := p.Discoverer.ContainerFieldsForPort(p.frontendAddr.Port)
+	if err != nil {
+		return err
+	}
 	req := p.RequestWithSettings(settings)
 	req.Action = action
 
@@ -101,7 +106,9 @@ func (p *EnvoyProxy) Run() {
 
 	// Have to give Docker a quick breather to see the container.
 	// XXX maybe watch events or poll the API instead?
-	time.Sleep(1 * time.Second)
+	if !p.Reload {
+		time.Sleep(1 * time.Second)
+	}
 
 	err := withRetries([]int{100, 500, 1000, 1500}, func() error {
 		err2 := p.DoAction(shimrpc.RegistrarRequest_REGISTER)
@@ -112,7 +119,10 @@ func (p *EnvoyProxy) Run() {
 	})
 
 	if err != nil {
-		log.Fatalf("Could not call Envoy: %s", err)
+		// We have to panic here because we currently can't return an
+		// error from this function. It is assumed to be the main function
+		// for this particular proxy.
+		panic("Could not call Envoy: " + err.Error())
 	}
 
 	// Wait for the signal handler to shut us down

@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/fsouza/go-dockerclient"
-	log "github.com/sirupsen/logrus"
 )
 
 type DockerSettings struct {
@@ -15,7 +14,7 @@ type DockerSettings struct {
 }
 
 type DiscoveryClient interface {
-	ContainerFieldsForPort(port int) *DockerSettings
+	ContainerFieldsForPort(port int) (*DockerSettings, error)
 }
 
 type DockerClient struct{}
@@ -77,10 +76,10 @@ OUTER:
 
 // ContainerFieldsForPort returns a selection of metadata lifted from
 // Docker labels if present.
-func (d *DockerClient) ContainerFieldsForPort(port int) *DockerSettings {
+func (d *DockerClient) ContainerFieldsForPort(port int) (*DockerSettings, error) {
 	container, err := d.ContainerForPort("", port)
 	if err != nil {
-		log.Fatalf("Unable to find container for %d! (%s)", port, err)
+		return nil, fmt.Errorf("Unable to find container for %d! (%s)", port, err)
 	}
 
 	proxyMode := container.Labels[ProxyModeLabel]
@@ -92,5 +91,5 @@ func (d *DockerClient) ContainerFieldsForPort(port int) *DockerSettings {
 		EnvironmentName: container.Labels[EnvironmentNameLabel],
 		ServiceName:     container.Labels[ServiceNameLabel],
 		ProxyMode:       strings.ToLower(proxyMode),
-	}
+	}, nil
 }
