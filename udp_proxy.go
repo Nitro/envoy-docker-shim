@@ -1,5 +1,9 @@
 package main
 
+// This file derives directly from libnetwork from Docker, Inc.
+// It is licensed under the Apache 2.0 license:
+// https://github.com/docker/libnetwork/blob/master/LICENSE
+
 import (
 	"encoding/binary"
 	"log"
