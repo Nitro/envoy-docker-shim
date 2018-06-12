@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"sync"
 
-	"github.com/Nitro/envoy-docker-shim/shimrpc"
+	"github.com/Nitro/envoy-docker-shim/internal/shimrpc"
+	log "github.com/sirupsen/logrus"
 )
 
 type Entry struct {
@@ -31,9 +31,9 @@ func NewRegistrar() *Registrar {
 }
 
 func (r *Registrar) PrintRequests() {
-	log.Println("Requests:")
+	log.Debug("Requests:")
 	for n, entry := range r.entries {
-		log.Printf("%s: %#v\n", n, *entry)
+		log.Debugf("%s: %#v\n", n, *entry)
 	}
 }
 
@@ -105,7 +105,7 @@ func (r *Registrar) Register(ctx context.Context, req *shimrpc.RegistrarRequest)
 		entry := RequestToEntry(req)
 		name := SvcName(entry)
 
-		log.Printf("Registering %s\n", name)
+		log.Infof("Registering %s\n", name)
 		r.Lock()
 		r.entries[name] = entry
 		r.PrintRequests()
@@ -118,7 +118,7 @@ func (r *Registrar) Register(ctx context.Context, req *shimrpc.RegistrarRequest)
 		entry := RequestToEntry(req)
 		name := SvcName(entry)
 
-		log.Printf("Deregistering %s\n", name)
+		log.Infof("Deregistering %s\n", name)
 		r.Lock()
 		delete(r.entries, name)
 		r.PrintRequests()

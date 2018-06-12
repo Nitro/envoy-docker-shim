@@ -8,8 +8,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/Nitro/envoy-docker-shim/envoyhttp"
-	"github.com/Nitro/envoy-docker-shim/shimrpc"
+	"github.com/Nitro/envoy-docker-shim/internal/envoyhttp"
+	"github.com/Nitro/envoy-docker-shim/internal/shimrpc"
 	"github.com/gorilla/mux"
 	"github.com/kelseyhightower/envconfig"
 	log "github.com/sirupsen/logrus"

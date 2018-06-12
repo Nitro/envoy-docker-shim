@@ -47,9 +47,11 @@ func handleStopSignals(p Proxy) {
 	s := make(chan os.Signal, 10)
 	signal.Notify(s, os.Interrupt, syscall.SIGTERM)
 
-	<-s
-	p.Close()
-	os.Exit(0)
+	for range s {
+		p.Close()
+
+		os.Exit(0)
+	}
 }
 
 func main() {

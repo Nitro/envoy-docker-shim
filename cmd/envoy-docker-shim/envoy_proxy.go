@@ -4,7 +4,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/Nitro/envoy-docker-shim/shimrpc"
+	"github.com/Nitro/envoy-docker-shim/internal/shimrpc"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -51,7 +51,7 @@ func (p *EnvoyProxy) WithClient(fn func(c shimrpc.RegistrarClient) error) error 
 	conn, err := grpc.Dial(p.ServerAddr,
 		grpc.WithInsecure(),
 		grpc.WithDialer(func(addr string, timeout time.Duration) (net.Conn, error) {
-			log.Infof("Connecting on Unix socket: %s", addr)
+			log.Debugf("Connecting on Unix socket: %s", addr)
 			return net.DialTimeout("unix", addr, timeout)
 		}),
 		grpc.WithBlock(),
@@ -81,7 +81,7 @@ func (p *EnvoyProxy) DoAction(action shimrpc.RegistrarRequest_Action) error {
 	return p.WithClient(func(c shimrpc.RegistrarClient) error {
 		resp, err := c.Register(context.Background(), req)
 		if err == nil {
-			log.Infof("Status: %v", resp.StatusCode)
+			log.Debugf("Status: %v", resp.StatusCode)
 		}
 		return err
 	})
@@ -104,7 +104,7 @@ func (p *EnvoyProxy) withRetries(fn func() error) error {
 
 // Run makes a call to the state server to register this endpoint.
 func (p *EnvoyProxy) Run() {
-	log.Infof("Starting up:\nFrontend: %s\nBackend: %s", p.frontendAddr, p.backendAddr)
+	log.Debugf("Starting up:\nFrontend: %s\nBackend: %s", p.frontendAddr, p.backendAddr)
 
 	// Have to give Docker a quick breather to see the container.
 	// XXX maybe watch events or poll the API instead?
@@ -115,7 +115,7 @@ func (p *EnvoyProxy) Run() {
 	err := p.withRetries(func() error {
 		err2 := p.DoAction(shimrpc.RegistrarRequest_REGISTER)
 		if err2 != nil {
-			log.Warn("Retrying...")
+			log.Debug("Retrying...")
 		}
 		return err2
 	})
@@ -135,7 +135,7 @@ func (p *EnvoyProxy) Run() {
 
 // Close makes a call to the state server to shut down this endpoint.
 func (p *EnvoyProxy) Close() {
-	log.Info("Shutting down!")
+	log.Debug("Shutting down!")
 
 	err := p.withRetries(func() error {
 		return p.DoAction(shimrpc.RegistrarRequest_DEREGISTER)

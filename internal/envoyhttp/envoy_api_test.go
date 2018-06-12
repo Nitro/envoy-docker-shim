@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Nitro/envoy-docker-shim/shimrpc"
+	"github.com/Nitro/envoy-docker-shim/internal/shimrpc"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
