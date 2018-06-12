@@ -1,2 +1,2 @@
 #!/bin/sh
-protoc -I shimrpc/ --go_out=plugins=grpc:shimrpc/ shimrpc/shimrpc.proto
+protoc -I internal/shimrpc/ --go_out=plugins=grpc:internal/shimrpc/ internal/shimrpc/shimrpc.proto
