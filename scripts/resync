@@ -8,20 +8,10 @@
 # and they will still correctly deregister the container on shutdown.
 # ------------------------------------------------------------------------------
 
-strFormat() {
-	# Fix the formatting of /proc/*/cmdline files
-	tr '[\0\n]' ' ' < $1
-}
-
-TMPFILE=/tmp/$$.tmp.sh
-for file in `find /proc -name "cmdline" 2>/dev/null`; do
-	CONTENT=`strFormat $file 2>/dev/null`
-	echo $CONTENT | grep -v "dockerd" | grep "envoy-docker-shim" >/dev/null
-	if [[ $? -eq 0 ]]; then
-		echo -n $CONTENT
-		echo " -reload"
-	fi
-done | sort -u > $TMPFILE
-
-sh -xe $TMPFILE
-rm -f $TMPFILE
+ps -ef | grep "envoy-docker-shi[m]" | grep -v dockerd | awk '{for(i=8;i<=NF;++i)printf("%s ", $i); print ""}' | (
+	while read -r line; do
+		line="$line -reload"
+		echo "+ $line"
+		eval "$line"
+	done
+)
