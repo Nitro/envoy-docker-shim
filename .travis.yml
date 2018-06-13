@@ -1,0 +1,10 @@
+language: go
+
+go:
+  - 1.10.x
+
+script:
+  - dep ensure
+  - go test -v --timeout 30s ./...
+  - cd cmd/envoy-docker-shim && go build
+  - cd ../envoy-docker-server && go build
