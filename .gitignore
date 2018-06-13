@@ -1,2 +1,3 @@
 cmd/envoy-docker-shim/envoy-docker-shim
 cmd/envoy-docker-server/envoy-docker-server
+vendor/
