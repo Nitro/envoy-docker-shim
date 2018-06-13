@@ -3,6 +3,9 @@ language: go
 go:
   - 1.10.x
 
+install:
+  - go get github.com/golang/dep/cmd/dep && dep ensure
+
 script:
   - dep ensure
   - go test -v --timeout 30s ./...
