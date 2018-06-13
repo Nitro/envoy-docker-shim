@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Nitro/envoy-docker-shim/envoyhttp"
+	"github.com/Nitro/envoy-docker-shim/internal/envoyhttp"
 	"github.com/Nitro/envoy-docker-shim/internal/shimrpc"
 	. "github.com/smartystreets/goconvey/convey"
 	"google.golang.org/grpc"
