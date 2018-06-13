@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/Nitro/envoy-docker-shim/internal/envoyhttp"
 	"github.com/Nitro/envoy-docker-shim/internal/shimrpc"
@@ -58,6 +59,7 @@ func Test_WithClient(t *testing.T) {
 		socketPath := filepath.Join(os.TempDir(), "docker-envoy.sock")
 		proxy, _ := NewEnvoyProxy(&fAddr, &bAddr, socketPath)
 		proxy.Retries = []int{1, 1}
+		proxy.GRPCTimeout = 20 * time.Millisecond
 		registrar := envoyhttp.NewRegistrar()
 
 		Reset(func() {
@@ -70,7 +72,7 @@ func Test_WithClient(t *testing.T) {
 			})
 
 			So(err, ShouldNotBeNil)
-			So(err.Error(), ShouldContainSubstring, "no such file")
+			So(err.Error(), ShouldContainSubstring, "deadline exceeded")
 		})
 
 		Convey("bubbles up errors when the server is working", func() {
@@ -103,6 +105,7 @@ func Test_Run(t *testing.T) {
 		proxy.Reload = true
 		proxy.Discoverer = &mockDiscoveryClient{}
 		proxy.Retries = []int{1, 1}
+		proxy.GRPCTimeout = 20 * time.Millisecond
 		registrar := envoyhttp.NewRegistrar()
 
 		s := serveGRPC(registrar, socketPath)
@@ -131,6 +134,7 @@ func Test_Close(t *testing.T) {
 		proxy.Reload = true
 		proxy.Discoverer = &mockDiscoveryClient{}
 		proxy.Retries = []int{1, 1}
+		proxy.GRPCTimeout = 20 * time.Millisecond
 
 		registrar := envoyhttp.NewRegistrar()
 

@@ -28,6 +28,7 @@ type EnvoyProxy struct {
 	Discoverer   DiscoveryClient
 	Reload       bool // Are we waiting around or just reloading the settings?
 	Retries      []int
+	GRPCTimeout  time.Duration
 }
 
 // NewEnvoyProxy returns a correctly configured EnvoyProxy.
@@ -41,6 +42,7 @@ func NewEnvoyProxy(frontendAddr, backendAddr net.Addr, svrAddr string) (*EnvoyPr
 		ServerAddr:   svrAddr,
 		Discoverer:   &DockerClient{},
 		Retries:      []int{100, 500, 1000, 1500},
+		GRPCTimeout:  3 * time.Second,
 	}, nil
 }
 
@@ -55,6 +57,7 @@ func (p *EnvoyProxy) WithClient(fn func(c shimrpc.RegistrarClient) error) error 
 			return net.DialTimeout("unix", addr, timeout)
 		}),
 		grpc.WithBlock(),
+		grpc.WithTimeout(p.GRPCTimeout),
 		grpc.FailOnNonTempDialError(true),
 	)
 	if err != nil {
