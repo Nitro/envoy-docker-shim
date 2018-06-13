@@ -20,7 +20,7 @@ import (
 
 type Config struct {
 	GrpcAddr string `envconfig:"LISTEN_ADDR" default:"unix:///tmp/docker-envoy.sock"`
-	ApiAddr    string `envconfig:"API_ADDR" default:":7776"`
+	ApiAddr  string `envconfig:"API_ADDR" default:":7776"`
 }
 
 func handleStopSignals(addr string) {

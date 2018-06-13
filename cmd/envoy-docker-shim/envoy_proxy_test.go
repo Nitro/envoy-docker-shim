@@ -16,25 +16,25 @@ import (
 )
 
 var (
-		fAddr = net.TCPAddr{
-			IP:   net.ParseIP("169.254.254.1"),
-			Port: 80,
-		}
+	fAddr = net.TCPAddr{
+		IP:   net.ParseIP("169.254.254.1"),
+		Port: 80,
+	}
 
-		bAddr = net.TCPAddr{
-			IP:   net.ParseIP("127.0.0.1"),
-			Port: 31337,
-		}
+	bAddr = net.TCPAddr{
+		IP:   net.ParseIP("127.0.0.1"),
+		Port: 31337,
+	}
 )
 
-type mockDiscoveryClient struct { }
+type mockDiscoveryClient struct{}
 
 func (c *mockDiscoveryClient) ContainerFieldsForPort(port int) (*DockerSettings, error) {
 	if port == 80 {
 		return &DockerSettings{
-			ServiceName: "kjartan",
+			ServiceName:     "kjartan",
 			EnvironmentName: "dev",
-			ProxyMode: "http",
+			ProxyMode:       "http",
 		}, nil
 	}
 
@@ -57,7 +57,7 @@ func Test_WithClient(t *testing.T) {
 	Convey("WithClient()", t, func() {
 		socketPath := filepath.Join(os.TempDir(), "docker-envoy.sock")
 		proxy, _ := NewEnvoyProxy(&fAddr, &bAddr, socketPath)
-		proxy.Retries = []int{1,1}
+		proxy.Retries = []int{1, 1}
 		registrar := envoyhttp.NewRegistrar()
 
 		Reset(func() {
@@ -102,7 +102,7 @@ func Test_Run(t *testing.T) {
 		proxy, _ := NewEnvoyProxy(&fAddr, &bAddr, socketPath)
 		proxy.Reload = true
 		proxy.Discoverer = &mockDiscoveryClient{}
-		proxy.Retries = []int{1,1}
+		proxy.Retries = []int{1, 1}
 		registrar := envoyhttp.NewRegistrar()
 
 		s := serveGRPC(registrar, socketPath)
@@ -130,7 +130,7 @@ func Test_Close(t *testing.T) {
 		proxy, _ := NewEnvoyProxy(&fAddr, &bAddr, socketPath)
 		proxy.Reload = true
 		proxy.Discoverer = &mockDiscoveryClient{}
-		proxy.Retries = []int{1,1}
+		proxy.Retries = []int{1, 1}
 
 		registrar := envoyhttp.NewRegistrar()
 
