@@ -1,6 +1,8 @@
 Envoy Docker Shim
 =================
 
+![goreportcard](https://goreportcard.com/badge/github.com/Nitro/envoy-docker-shim)
+
 This is a pre-production project to use Envoy in place of Docker's own
 `docker-proxy`. The point of doing this is to enable Envoy's metric gathering
 and distributed tracing capabilities for any service running on Docker.
