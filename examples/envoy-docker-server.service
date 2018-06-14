@@ -1,0 +1,14 @@
+[Unit]
+Description=Envoy Docker Shim
+PartOf=docker.service
+
+[Service]
+ExecStart=/path/to/envoy-docker-server
+ExecStartPost=/path/to/resync
+ExecReload=/path/to/resync
+KillMode=process
+Restart=on-failure
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
