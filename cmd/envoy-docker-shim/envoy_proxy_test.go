@@ -66,13 +66,14 @@ func Test_WithClient(t *testing.T) {
 			os.Remove(socketPath)
 		})
 
-		Convey("returns an error when there is no socket to connect to", func() {
+		Convey("proceeds when there is no socket to connect to", func() {
+			// We need to proceed on error or we can block Docker from starting/stopping
+			// when something is wrong with the shim's server.
 			err := proxy.WithClient(func(c shimrpc.RegistrarClient) error {
 				return nil
 			})
 
-			So(err, ShouldNotBeNil)
-			So(err.Error(), ShouldContainSubstring, "deadline exceeded")
+			So(err, ShouldBeNil)
 		})
 
 		Convey("bubbles up errors when the server is working", func() {

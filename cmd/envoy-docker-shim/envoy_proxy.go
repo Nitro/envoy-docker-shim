@@ -58,6 +58,7 @@ func (p *EnvoyProxy) WithClient(fn func(c shimrpc.RegistrarClient) error) error 
 		}),
 		grpc.WithTimeout(p.GRPCTimeout),
 		grpc.FailOnNonTempDialError(true),
+		// Purposely non-blocking to prevent wedging Docker on error
 	)
 	if err != nil {
 		return err
