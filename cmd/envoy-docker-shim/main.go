@@ -75,8 +75,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Fprint(f, "0\n")
-	f.Close()
+	// If we were run by Docker this will be open, if not, skip
+	if f != nil {
+		fmt.Fprint(f, "0\n")
+		f.Close()
+	}
 
 	// Run will block until the proxy stops
 	p.Run()

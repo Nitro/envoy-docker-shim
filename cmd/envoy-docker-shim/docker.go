@@ -3,8 +3,14 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/fsouza/go-dockerclient"
+	"golang.org/x/net/context"
+)
+
+const (
+	DockerTimeout = 200 * time.Millisecond
 )
 
 type DockerSettings struct {
@@ -47,8 +53,12 @@ func (d *DockerClient) ContainerForPort(socketUrl string, port int) (*docker.API
 
 	// Make sure we list all containers, including stopped ones,
 	// in the event that the container exits before we get here.
+	ctx, _ := context.WithTimeout(context.Background(), DockerTimeout)
 	containers, err := client.ListContainers(
-		docker.ListContainersOptions{All: true},
+		docker.ListContainersOptions{
+			All:     true,
+			Context: ctx,
+		},
 	)
 	if err != nil {
 		return nil, fmt.Errorf("Can't list containers: %s", err)

@@ -56,7 +56,6 @@ func (p *EnvoyProxy) WithClient(fn func(c shimrpc.RegistrarClient) error) error 
 			log.Debugf("Connecting on Unix socket: %s", addr)
 			return net.DialTimeout("unix", addr, timeout)
 		}),
-		grpc.WithBlock(),
 		grpc.WithTimeout(p.GRPCTimeout),
 		grpc.FailOnNonTempDialError(true),
 	)
@@ -107,6 +106,7 @@ func (p *EnvoyProxy) withRetries(fn func() error) error {
 
 // Run makes a call to the state server to register this endpoint.
 func (p *EnvoyProxy) Run() {
+		log.SetLevel(log.DebugLevel)
 	log.Debugf("Starting up:\nFrontend: %s\nBackend: %s", p.frontendAddr, p.backendAddr)
 
 	// Have to give Docker a quick breather to see the container.
@@ -123,15 +123,17 @@ func (p *EnvoyProxy) Run() {
 		return err2
 	})
 
-	if err != nil {
-		// We have to panic here because we currently can't return an
-		// error from this function. It is assumed to be the main function
-		// for this particular proxy.
-		panic("Could not call Envoy: " + err.Error())
-	}
-
-	// Wait for the signal handler to shut us down
-	if !p.Reload {
+	if p.Reload {
+		if err != nil {
+			// We have to panic here because we currently can't return an
+			// error from this function. It is assumed to be the main function
+			// for this particular proxy.
+			panic("Could not call Envoy: " + err.Error())
+		}
+	} else {
+		if err != nil {
+			log.Errorf("Could not call Envoy: %s", err)
+		}
 		select {}
 	}
 }
